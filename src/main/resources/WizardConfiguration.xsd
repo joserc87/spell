@@ -1,0 +1,468 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://www.thedocumentwizard.nl/wizardconfiguration/2.0" elementFormDefault="qualified" targetNamespace="http://www.thedocumentwizard.nl/wizardconfiguration/2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="Wizard">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" name="Steps" type="tns:ArrayOfSteptype" />
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:string" />
+      <xs:attribute name="documentTypeID" type="xs:string" />
+      <xs:attribute name="documentTypeName" type="xs:string" />
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfSteptype">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Step" type="tns:steptype" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="steptype">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="Conditions" type="tns:ArrayOfWizardCondition" />
+      <xs:element minOccurs="0" maxOccurs="1" name="AdvancedRules" type="tns:ArrayOfWizardAdvancedRule" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Questions" type="tns:ArrayOfWizardQuestion" />
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:int" use="required" />
+    <xs:attribute name="name" type="xs:string" />
+    <xs:attribute name="groupName" type="xs:string" />
+    <xs:attribute name="type">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="START" />
+          <xs:enumeration value="STEP" />
+          <xs:enumeration value="FINISH" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="nextStepID" type="xs:int" />
+  </xs:complexType>
+  <xs:complexType name="ArrayOfWizardCondition">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Condition">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice minOccurs="1" maxOccurs="1">
+              <xs:element minOccurs="0" maxOccurs="1" name="Or" type="tns:OrTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Not" type="tns:NotTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="RegEx" type="tns:RegexTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Empty" type="tns:EmptyTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Equal" type="tns:EqualComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Different" type="tns:DifferentComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="GreaterOrEqualThan" type="tns:GreaterOrEqualThanComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="GreaterThan" type="tns:GreaterThanComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="LessOrEqualThan" type="tns:LessOrEqualThanComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="LessThan" type="tns:LessThanComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="And" type="tns:AndTrigger" />
+            </xs:choice>
+          </xs:sequence>
+          <xs:attribute name="nextStepID" type="xs:int" use="required" />
+          <xs:attribute name="nextStepName" type="xs:string" />
+          <xs:attribute name="nextStepGroupName" type="xs:string" />
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="OrTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ComplexTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ComplexTrigger" abstract="true">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:Trigger">
+        <xs:sequence>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element minOccurs="0" maxOccurs="1" name="Or" type="tns:OrTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="LessThan" type="tns:LessThanComparisonTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="RegEx" type="tns:RegexTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Empty" type="tns:EmptyTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="LessOrEqualThan" type="tns:LessOrEqualThanComparisonTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="And" type="tns:AndTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Not" type="tns:NotTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Equal" type="tns:EqualComparisonTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Different" type="tns:DifferentComparisonTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="GreaterOrEqualThan" type="tns:GreaterOrEqualThanComparisonTrigger" />
+            <xs:element minOccurs="0" maxOccurs="1" name="GreaterThan" type="tns:GreaterThanComparisonTrigger" />
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Trigger" abstract="true" />
+  <xs:complexType name="UnaryTrigger" abstract="true">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:Trigger">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="Const" type="tns:ConstTriggerValue" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Control" type="tns:ControlTriggerValue" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Metadata" type="tns:MetadataTriggerValue" />
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ConstTriggerValue">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:TriggerValue">
+        <xs:attribute name="val" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TriggerValue" abstract="true" />
+  <xs:complexType name="MetadataTriggerValue">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:TriggerValue">
+        <xs:attribute name="id" type="xs:string" />
+        <xs:attribute name="name" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ControlTriggerValue">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:TriggerValue">
+        <xs:attribute name="id" type="xs:string" />
+        <xs:attribute name="step" type="xs:int" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="EmptyTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:UnaryTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RegexTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:UnaryTrigger">
+        <xs:attribute name="pattern" type="xs:string" />
+        <xs:attribute name="ignoreCase" type="xs:boolean" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="BinaryTrigger" abstract="true">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:Trigger">
+        <xs:sequence>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element minOccurs="0" maxOccurs="1" name="Control" type="tns:ControlTriggerValue" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Const" type="tns:ConstTriggerValue" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Metadata" type="tns:MetadataTriggerValue" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="dataType" type="tns:EDataType" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="EDataType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="String" />
+      <xs:enumeration value="StringCI" />
+      <xs:enumeration value="Integer" />
+      <xs:enumeration value="Double" />
+      <xs:enumeration value="Date" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="GreaterThanComparisonTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BinaryTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="GreaterOrEqualThanComparisonTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BinaryTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="DifferentComparisonTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BinaryTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="EqualComparisonTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BinaryTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="LessOrEqualThanComparisonTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BinaryTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="LessThanComparisonTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BinaryTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AndTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ComplexTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="NotTrigger">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ComplexTrigger" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfWizardAdvancedRule">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="AdvancedRule">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice minOccurs="1" maxOccurs="1">
+              <xs:element minOccurs="0" maxOccurs="1" name="Empty" type="tns:EmptyTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Or" type="tns:OrTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Not" type="tns:NotTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="RegEx" type="tns:RegexTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="And" type="tns:AndTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Equal" type="tns:EqualComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Different" type="tns:DifferentComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="GreaterOrEqualThan" type="tns:GreaterOrEqualThanComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="GreaterThan" type="tns:GreaterThanComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="LessOrEqualThan" type="tns:LessOrEqualThanComparisonTrigger" />
+              <xs:element minOccurs="0" maxOccurs="1" name="LessThan" type="tns:LessThanComparisonTrigger" />
+            </xs:choice>
+            <xs:element minOccurs="0" maxOccurs="1" name="Metadatas" type="tns:ArrayOfImplicitWizardMetadata" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfImplicitWizardMetadata">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Metadata" type="tns:ImplicitWizardMetadata" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ImplicitWizardMetadata">
+    <xs:simpleContent>
+      <xs:extension base="tns:WizardMetadata">
+        <xs:attribute name="id" type="xs:string" />
+        <xs:attribute name="name" type="xs:string" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="WizardMetadata" abstract="true">
+    <xs:simpleContent>
+      <xs:extension base="xs:string" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ExplicitWizardMetadata">
+    <xs:simpleContent>
+      <xs:extension base="tns:WizardMetadata">
+        <xs:attribute name="metadataID" type="xs:string" />
+        <xs:attribute name="metadataName" type="xs:string" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfWizardQuestion">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Question">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice minOccurs="1" maxOccurs="1">
+              <xs:element minOccurs="0" maxOccurs="1" name="Date" type="tns:DateControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Attachment" type="tns:AttachmentFileControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Multi" type="tns:MultiControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Number" type="tns:NumberControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Radio" type="tns:RadioControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="String" type="tns:StringControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Email" type="tns:EmailControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Image" type="tns:ImageFileControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Checkbox" type="tns:CheckboxControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Label" type="tns:LabelControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="List" type="tns:ListControl" />
+              <xs:element minOccurs="0" maxOccurs="1" name="Text" type="tns:TextControl" />
+            </xs:choice>
+          </xs:sequence>
+          <xs:attribute name="id" type="xs:string" />
+          <xs:attribute name="name" type="xs:string" />
+          <xs:attribute name="required" type="xs:boolean" />
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DateControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:AbstractControl">
+        <xs:attribute name="displayFormat" type="xs:string" />
+        <xs:attribute name="submitFormat" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AbstractControl" abstract="true">
+    <xs:attribute name="id" type="xs:string" />
+    <xs:attribute name="metadataID" type="xs:string" />
+    <xs:attribute name="metadataName" type="xs:string" />
+    <xs:attribute name="defaultValue" type="xs:string" />
+    <xs:attribute name="defaultValueMetadataID" type="xs:string" />
+    <xs:attribute name="defaultValueMetadataName" type="xs:string" />
+    <xs:attribute name="enabled" type="xs:boolean" />
+  </xs:complexType>
+  <xs:complexType name="ListControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:AbstractControl">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="XPath" type="tns:XPathDataSource" />
+          <xs:element minOccurs="0" maxOccurs="1" name="Items" type="tns:ArrayOfListItem" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="XPathDataSource">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="XPath" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ValueNode" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="DisplayNode" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfListItem">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Item" type="tns:ListItem" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ListItem">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="Value" type="tns:ExplicitWizardMetadata" />
+      <xs:element minOccurs="0" maxOccurs="1" name="DisplayText" type="tns:ExplicitWizardMetadata" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CheckboxControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:AbstractControl">
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute name="selected" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RadioControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:AbstractControl">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="Items" type="tns:ArrayOfChoice1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfChoice1">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element minOccurs="1" maxOccurs="1" name="Text" nillable="true" type="tns:TextControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Checkbox" nillable="true" type="tns:CheckboxControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Attachment" nillable="true" type="tns:AttachmentFileControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Label" nillable="true" type="tns:LabelControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Number" nillable="true" type="tns:NumberControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Date" nillable="true" type="tns:DateControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Email" nillable="true" type="tns:EmailControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="List" nillable="true" type="tns:ListControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Radio" nillable="true" type="tns:RadioControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Image" nillable="true" type="tns:ImageFileControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="String" nillable="true" type="tns:StringControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Multi" nillable="true" type="tns:MultiControl" />
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="TextControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:CharacterControl" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CharacterControl" abstract="true">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:AbstractControl">
+        <xs:attribute name="minLength" type="xs:int" />
+        <xs:attribute name="maxLength" type="xs:int" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="LabelControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:CharacterControl">
+        <xs:attribute name="hidden" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="StringControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:CharacterControl">
+        <xs:attribute name="format" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="EmailControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:StringControl" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="FileNameControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:StringControl">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="ParentControl" type="tns:FileControl" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="FileControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:AbstractControl">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="FileName" type="tns:FileNameControl" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ImageFileControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:FileControl">
+        <xs:attribute name="maxWidth" type="xs:int" />
+        <xs:attribute name="maxHeight" type="xs:int" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AttachmentFileControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:FileControl" />
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="NumberControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:AbstractControl">
+        <xs:attribute name="allowDecimals" type="xs:boolean" />
+        <xs:attribute name="decimalPrecision" type="xs:int" />
+        <xs:attribute name="decimalSeparator" type="tns:Separator" />
+        <xs:attribute name="minValue" type="xs:float" />
+        <xs:attribute name="maxValue" type="xs:float" />
+        <xs:attribute name="trimTrailedZeros" type="xs:boolean" />
+        <xs:attribute name="outputFormat" type="xs:string" />
+        <xs:attribute name="trailingZerosReplacement" type="xs:string" />
+        <xs:attribute name="step" type="xs:float" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="Separator">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Dot" />
+      <xs:enumeration value="Comma" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="MultiControl">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:AbstractControl">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="Controls" type="tns:ArrayOfChoice2" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfChoice2">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element minOccurs="1" maxOccurs="1" name="Text" nillable="true" type="tns:TextControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Number" nillable="true" type="tns:NumberControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Attachment" nillable="true" type="tns:AttachmentFileControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Label" nillable="true" type="tns:LabelControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="String" nillable="true" type="tns:StringControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Date" nillable="true" type="tns:DateControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Email" nillable="true" type="tns:EmailControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Image" nillable="true" type="tns:ImageFileControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Checkbox" nillable="true" type="tns:CheckboxControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Radio" nillable="true" type="tns:RadioControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="List" nillable="true" type="tns:ListControl" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Multi" nillable="true" type="tns:MultiControl" />
+    </xs:choice>
+  </xs:complexType>
+</xs:schema>
