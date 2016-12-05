@@ -1,5 +1,5 @@
 # Wizard: MyWizard
 
-step     "step number 1": 
+step     "step number 1" as first_step: 
 
 step "step number 2", "my group": # Inline comment
