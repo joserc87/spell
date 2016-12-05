@@ -16,11 +16,39 @@ wizard: (NEWLINE | step)* EOF;
 // Each step is a step header + a block
 step
   : STEP STRING (COMMA STRING)? alias? COLON NEWLINE
+  (
+    question | when
+  )*
   ;
 
 alias
   : AS NAME
   ;
+
+question
+  : STRING
+  | control_type STRING
+  ;
+
+control_type
+  : LABEL_TYPE
+  | STRING_TYPE
+  | EMAIL_TYPE
+  | TEXT_TYPE
+  | DATE_TYPE
+  | NUMBER_TYPE
+  | CHECKBOX_TYPE
+  | LIST_TYPE
+  | RADIO_TYPE
+  | ATTACHMENT_TYPE
+  | IMAGE_TYPE
+  | MULTY_TYPE
+  ;
+
+when
+  : WHEN 'CONDITION' COLON NEWLINE
+  ;
+
 
 //////////////////
 // LEXER RULES: //
@@ -34,8 +62,23 @@ STRING
  | '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
  ;
 
-STEP    : 'step';
-AS      : 'as';
+STEP            : 'step';
+AS              : 'as';
+WHEN            : 'when';
+
+// Controls
+LABEL_TYPE      : 'label';
+STRING_TYPE     : 'string';
+EMAIL_TYPE      : 'email';
+TEXT_TYPE       : 'text';
+DATE_TYPE       : 'date';
+NUMBER_TYPE     : 'number';
+CHECKBOX_TYPE   : 'checkbox';
+LIST_TYPE       : 'list';
+RADIO_TYPE      : 'radio';
+ATTACHMENT_TYPE : 'attachment';
+IMAGE_TYPE      : 'image';
+MULTY_TYPE      : 'multy';
 
 /// stringescapeseq ::=  "\" <any source character>
 fragment STRING_ESCAPE_SEQ

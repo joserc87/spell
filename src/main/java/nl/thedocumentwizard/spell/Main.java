@@ -63,13 +63,14 @@ public class Main {
 
         // Marshall the wizard:
         WizardConfiguration wizard = (WizardConfiguration) listener.getWizard();
-        wizard.marshall(outputFile);
+        wizard.marshall(outputFile, true);
     }
 
     public static void printUsage() {
         System.out.println("Usage:");
         System.out.println("$ ./run.sh <inputFile.spl> <outputFile.xml>");
     }
+
     public static void main(String args[]) {
         //generateSampleXML(args);
         // printWizard("step 'first step':\r\n" +

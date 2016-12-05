@@ -3,9 +3,7 @@ package nl.thedocumentwizard.spell.parser;
 
 import nl.thedocumentwizard.spell.parser.SpellBaseListener;
 import nl.thedocumentwizard.spell.parser.SpellParser;
-import nl.thedocumentwizard.wizardconfiguration.jaxb.ObjectFactory;
-import nl.thedocumentwizard.wizardconfiguration.jaxb.Steptype;
-import nl.thedocumentwizard.wizardconfiguration.jaxb.Wizard;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class MySpellListener extends SpellBaseListener {
@@ -25,7 +23,7 @@ public class MySpellListener extends SpellBaseListener {
         this.wizard = objectFactory.createWizard();
         this.wizard.setSteps(objectFactory.createArrayOfSteptype());
         for (SpellParser.StepContext stepContext : ctx.step()) {
-            this.wizard.getSteps().getStep().add(this.createStep(stepContext));
+            this.wizard.getSteps().getStep().add(this.getStep(stepContext));
         }
         System.out.println("Wizard parsed");
     }
@@ -45,16 +43,56 @@ public class MySpellListener extends SpellBaseListener {
         return s;
     }
 
-    protected Steptype createStep(SpellParser.StepContext ctx) {
+    /**
+     * Converts a StepContext into a WizardStep
+     * 
+     * @param ctx The context that defines the step
+     * @return A Steptype
+     */
+    protected Steptype getStep(SpellParser.StepContext ctx) {
         Steptype step = objectFactory.createSteptype();
-        String name = ctx.STRING(0).getText();
-        step.setName(name.substring(1, name.length()-1));
-        String group = null;
+        step.setName(getString(ctx.STRING(0)));
         if (ctx.STRING().size() > 1) {
-            group = ctx.STRING(1).getText();
-            step.setGroupName(group.substring(1, group.length()-1));
+            step.setGroupName(getString(ctx.STRING(1)));
+        }
+        for (SpellParser.QuestionContext questionContext : ctx.question()) {
+            if (step.getQuestions() == null) {
+                step.setQuestions(new ArrayOfWizardQuestion());
+            }
+            step.getQuestions().getQuestion().add(getQuestion(questionContext));
         }
         return step;
+    }
+
+    /**
+     * Converts a QuestionContext into a WizardQuestion
+     *
+     * @param ctx The context that defines the question
+     * @return A Question
+     */
+    protected ArrayOfWizardQuestion.Question getQuestion(SpellParser.QuestionContext ctx) {
+        ArrayOfWizardQuestion.Question question = objectFactory.createArrayOfWizardQuestionQuestion();
+        String name = getString(ctx.STRING());
+        if (name != null) {
+            question.setName(name);
+        }
+        // Check the control type
+        if (ctx.control_type() == null ||
+                ctx.control_type().STRING_TYPE() != null) { // by default, string
+            question.setString(getStringControl(ctx));
+        }
+        return question;
+    }
+
+    /**
+     * Converts the QuestionContext context into a String control
+     *
+     * @param ctx The context that defines the control
+     * @return A StringControl
+     */
+    protected StringControl getStringControl(SpellParser.QuestionContext ctx) {
+        StringControl control = objectFactory.createStringControl();
+        return control;
     }
 
 }
