@@ -1,7 +1,12 @@
 # Wizard: MyWizard
 
 step     "step number 1" as first_step: 
-    required "mandatory question"
-    "optional string question"
+    required "mandatory string question"
+    number "optional number question"
 
 step "step number 2", "my group": # Inline comment
+    label "a label"
+    required list "a label"
+
+step "final step"
+    image "image upload control"

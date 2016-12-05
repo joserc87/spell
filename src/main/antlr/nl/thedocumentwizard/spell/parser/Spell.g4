@@ -45,7 +45,7 @@ control_type
   | RADIO_TYPE
   | ATTACHMENT_TYPE
   | IMAGE_TYPE
-  | MULTY_TYPE
+  | MULTI_TYPE
   ;
 
 when
@@ -82,7 +82,7 @@ LIST_TYPE       : 'list';
 RADIO_TYPE      : 'radio';
 ATTACHMENT_TYPE : 'attachment';
 IMAGE_TYPE      : 'image';
-MULTY_TYPE      : 'multy';
+MULTI_TYPE      : 'multi';
 
 /// stringescapeseq ::=  "\" <any source character>
 fragment STRING_ESCAPE_SEQ
