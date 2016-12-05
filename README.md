@@ -1,4 +1,4 @@
-# SPELL Language Compiller
+# SPELL Language Compiler
 
 A compiler to generate wizard configuration XMLs from the much simpler SPELL
 langauge, written in Java. It uses [antrl](http://www.antlr.org) to parse the
