@@ -14,8 +14,9 @@ package nl.thedocumentwizard.spell.parser;
 wizard: (NEWLINE | step)* EOF;
 
 // Each step is a step header + a block
-step: 'step ' STRING COLON NEWLINE ;
-
+step
+  : STEP STRING (COMMA STRING)? COLON NEWLINE
+  ;
 
 //////////////////
 // LEXER RULES: //
@@ -58,4 +59,5 @@ fragment LINE_JOINING
 
 STEP    : 'step';
 COLON   : ':';
+COMMA   : ',';
 INT     : [0-9]+ ;
