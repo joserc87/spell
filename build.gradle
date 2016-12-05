@@ -9,8 +9,11 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+    // https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime
+    compile group: 'org.glassfish.jaxb', name: 'txw2', version: '2.2.11'
 }
 
 jar {
