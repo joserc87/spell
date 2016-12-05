@@ -40,26 +40,10 @@ public class Main {
         System.out.println("Finished");
     }
 
-    public static void printWizard(String spellSentence) {
-        // Get our lexer
-        SpellLexer lexer = new SpellLexer(new ANTLRInputStream(spellSentence));
+    public static void parseFile(File inputFile, File outputFile) throws IOException {
 
-        // Get a list of matched tokens
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ObjectFactory factory = new MyObjectFactory();
 
-        // Pass the tokens to the parser
-        SpellParser parser = new SpellParser(tokens);
-
-        // Specify our entry point
-        SpellParser.WizardContext drinkSentenceContext = parser.wizard();
-
-        // Walk it and attach our listener
-        ParseTreeWalker walker = new ParseTreeWalker();
-        MySpellListener listener = new MySpellListener();
-        walker.walk(listener, drinkSentenceContext);
-    }
-
-    public static void parseFile(File inputFile) throws IOException {
         // Get our lexer
         SpellLexer lexer = new SpellLexer(new ANTLRInputStream(new FileInputStream(inputFile)));
 
@@ -70,29 +54,33 @@ public class Main {
         SpellParser parser = new SpellParser(tokens);
 
         // Specify our entry point
-        SpellParser.WizardContext drinkSentenceContext = parser.wizard();
+        SpellParser.WizardContext wizardSentenceContext = parser.wizard();
 
         // Walk it and attach our listener
         ParseTreeWalker walker = new ParseTreeWalker();
-        MySpellListener listener = new MySpellListener();
-        walker.walk(listener, drinkSentenceContext);
+        MySpellListener listener = new MySpellListener(factory);
+        walker.walk(listener, wizardSentenceContext);
+
+        // Marshall the wizard:
+        WizardConfiguration wizard = (WizardConfiguration) listener.getWizard();
+        wizard.marshall(outputFile);
     }
 
     public static void printUsage() {
         System.out.println("Usage:");
-        System.out.println("$ ./run.sh <inputFile.spl>");
+        System.out.println("$ ./run.sh <inputFile.spl> <outputFile.xml>");
     }
     public static void main(String args[]) {
         //generateSampleXML(args);
         // printWizard("step 'first step':\r\n" +
         //         "step \"second step\":\n");
-        if (args.length != 1) {
+        if (args.length != 2) {
             System.err.println("Wrong number of arguments");
-            System.err.println("" + args.length + " provided, 1 needed");
+            System.err.println("" + args.length + " provided, 2 needed");
             printUsage();
         } else {
             try {
-                parseFile(new File(args[0]));
+                parseFile(new File(args[0]), new File(args[1]));
             } catch (IOException e) {
                 e.printStackTrace();
             }

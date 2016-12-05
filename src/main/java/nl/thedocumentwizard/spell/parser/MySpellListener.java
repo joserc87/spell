@@ -3,27 +3,34 @@ package nl.thedocumentwizard.spell.parser;
 
 import nl.thedocumentwizard.spell.parser.SpellBaseListener;
 import nl.thedocumentwizard.spell.parser.SpellParser;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.ObjectFactory;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.Steptype;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.Wizard;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class MySpellListener extends SpellBaseListener {
 
-    @Override
-    public void enterWizard(SpellParser.WizardContext ctx) {
-         System.out.println("Detected wizard:");
-         System.out.println(ctx.getText());
+    private ObjectFactory objectFactory;
+    private Wizard wizard;
+    public MySpellListener(ObjectFactory factory) {
+        this.objectFactory = factory;
+    }
+
+    public Wizard getWizard() {
+        return wizard;
     }
 
     @Override
-    public void enterStep(SpellParser.StepContext ctx) {
-        String name = ctx.STRING(0).getText();
-        name = name.substring(1, name.length()-1);
-        String group = null;
-        if (ctx.STRING().size() > 1) {
-            group = ctx.STRING(1).getText();
-            group = group.substring(1, group.length()-1);
+    public void enterWizard(SpellParser.WizardContext ctx) {
+        this.wizard = objectFactory.createWizard();
+        this.wizard.setSteps(objectFactory.createArrayOfSteptype());
+        for (SpellParser.StepContext stepContext : ctx.step()) {
+            this.wizard.getSteps().getStep().add(this.createStep(stepContext));
         }
-        System.out.println("Detected step with name " + name + (group == null ? " and no group" : " and group " + group));
+        System.out.println("Wizard parsed");
     }
+
+    // Helper methods
 
     private String getString(TerminalNode node) {
         String s = null;
@@ -36,6 +43,18 @@ public class MySpellListener extends SpellBaseListener {
             }
         }
         return s;
+    }
+
+    protected Steptype createStep(SpellParser.StepContext ctx) {
+        Steptype step = objectFactory.createSteptype();
+        String name = ctx.STRING(0).getText();
+        step.setName(name.substring(1, name.length()-1));
+        String group = null;
+        if (ctx.STRING().size() > 1) {
+            group = ctx.STRING(1).getText();
+            step.setGroupName(group.substring(1, group.length()-1));
+        }
+        return step;
     }
 
 }
