@@ -72,6 +72,11 @@ public class MySpellListener extends SpellBaseListener {
      */
     protected ArrayOfWizardQuestion.Question getQuestion(SpellParser.QuestionContext ctx) {
         ArrayOfWizardQuestion.Question question = objectFactory.createArrayOfWizardQuestionQuestion();
+        // Question required?:
+        if (ctx.REQUIRED() != null) {
+            question.setRequired(true);
+        }
+        // Question name:
         String name = getString(ctx.STRING());
         if (name != null) {
             question.setName(name);

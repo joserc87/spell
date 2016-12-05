@@ -26,8 +26,11 @@ alias
   ;
 
 question
-  : STRING
-  | control_type STRING
+  : REQUIRED? control_type? STRING
+    (
+        NEWLINE
+      //| COLON NEWLINEI
+    )
   ;
 
 control_type
@@ -65,6 +68,7 @@ STRING
 STEP            : 'step';
 AS              : 'as';
 WHEN            : 'when';
+REQUIRED        : 'required';
 
 // Controls
 LABEL_TYPE      : 'label';

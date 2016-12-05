@@ -1,6 +1,7 @@
 # Wizard: MyWizard
 
 step     "step number 1" as first_step: 
-    "question 1"
+    required "mandatory question"
+    "optional string question"
 
 step "step number 2", "my group": # Inline comment
