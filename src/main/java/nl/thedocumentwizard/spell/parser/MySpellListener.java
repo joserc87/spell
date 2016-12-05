@@ -1,8 +1,8 @@
 
 package nl.thedocumentwizard.spell.parser;
 
-import nl.thedocumentwizard.spell.parser.antlr.SpellBaseListener;
-import nl.thedocumentwizard.spell.parser.antlr.SpellParser;
+import nl.thedocumentwizard.spell.parser.SpellBaseListener;
+import nl.thedocumentwizard.spell.parser.SpellParser;
 
 public class MySpellListener extends SpellBaseListener {
 

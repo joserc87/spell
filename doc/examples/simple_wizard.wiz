@@ -1,0 +1,5 @@
+# Wizard: MyWizard
+
+step "step number 1":
+
+step "step number 2": # Inline comment

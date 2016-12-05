@@ -1,8 +1,8 @@
 package nl.thedocumentwizard.spell;
 
 import nl.thedocumentwizard.spell.parser.MySpellListener;
-import nl.thedocumentwizard.spell.parser.antlr.SpellLexer;
-import nl.thedocumentwizard.spell.parser.antlr.SpellParser;
+import nl.thedocumentwizard.spell.parser.SpellLexer;
+import nl.thedocumentwizard.spell.parser.SpellParser;
 import nl.thedocumentwizard.wizardconfiguration.MyObjectFactory;
 import nl.thedocumentwizard.wizardconfiguration.WizardConfiguration;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.ArrayOfSteptype;
@@ -20,9 +20,7 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.Iterator;
 
 /**
@@ -61,9 +59,43 @@ public class Main {
         walker.walk(listener, drinkSentenceContext);
     }
 
+    public static void parseFile(File inputFile) throws IOException {
+        // Get our lexer
+        SpellLexer lexer = new SpellLexer(new ANTLRInputStream(new FileInputStream(inputFile)));
+
+        // Get a list of matched tokens
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+
+        // Pass the tokens to the parser
+        SpellParser parser = new SpellParser(tokens);
+
+        // Specify our entry point
+        SpellParser.WizardContext drinkSentenceContext = parser.wizard();
+
+        // Walk it and attach our listener
+        ParseTreeWalker walker = new ParseTreeWalker();
+        MySpellListener listener = new MySpellListener();
+        walker.walk(listener, drinkSentenceContext);
+    }
+
+    public static void printUsage() {
+        System.out.println("Usage:");
+        System.out.println("$ ./run.sh <inputFile.spl>");
+    }
     public static void main(String args[]) {
         //generateSampleXML(args);
-        printWizard("step 'first step':\r\n" +
-                "step \"second step\":\n");
+        // printWizard("step 'first step':\r\n" +
+        //         "step \"second step\":\n");
+        if (args.length != 1) {
+            System.err.println("Wrong number of arguments");
+            System.err.println("" + args.length + " provided, 1 needed");
+            printUsage();
+        } else {
+            try {
+                parseFile(new File(args[0]));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
