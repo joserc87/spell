@@ -2,7 +2,10 @@ group 'nl.thedocumentwizard.spell'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'application'
 apply plugin: 'antlr'
+
+mainClassName = 'nl.thedocumentwizard.spell.Main'
 
 sourceCompatibility = 1.5
 
