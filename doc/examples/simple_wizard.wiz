@@ -1,12 +1,13 @@
 # Wizard: MyWizard
 
-step     "step number 1" as first_step: 
-    required "mandatory string question"
-    number "optional number question"
+step "step number 1" as first_step:
+    "Simple question"
+    required string "mandatory string question" = "default value" -> $metadataName
+    number "optional number question" = $metadataName
 
 step "step number 2", "my group": # Inline comment
-    label "a label"
-    required list "a label"
+    label "" = "a label"
+    required list "a list"
 
-step "final step"
+step "final step":
     image "image upload control"

@@ -16,9 +16,9 @@ wizard: (NEWLINE | step)* EOF;
 // Each step is a step header + a block
 step
   : STEP STRING (COMMA STRING)? alias? COLON NEWLINE
-  (
-    question | when
-  )*
+    ( question
+    | when
+    )*
   ;
 
 alias
@@ -26,11 +26,19 @@ alias
   ;
 
 question
-  : REQUIRED? control_type? STRING
+  : REQUIRED? control_type? STRING default_value? ctrl_metadata?
     (
         NEWLINE
       //| COLON NEWLINEI
     )
+  ;
+
+default_value
+  : EQUAL (literal | METADATA)
+  ;
+
+ctrl_metadata
+  : RIGHT_ARROW METADATA
   ;
 
 control_type
@@ -52,6 +60,9 @@ when
   : WHEN 'CONDITION' COLON NEWLINE
   ;
 
+literal
+  : STRING | NUM | bool
+  ;
 
 //////////////////
 // LEXER RULES: //
@@ -61,9 +72,17 @@ when
 // https://github.com/antlr/grammars-v4/blob/master/python3/Python3.g4
 
 STRING
- : '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n'] )* '\''
- | '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
- ;
+  : '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n'] )* '\''
+  | '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
+  ;
+
+bool
+  : ( TRUE | FALSE )
+  ;
+
+// Types
+TRUE            : 'true';
+FALSE           : 'false';
 
 STEP            : 'step';
 AS              : 'as';
@@ -100,6 +119,10 @@ NAME
  : ID_START ID_CONTINUE*
  ;
 
+METADATA
+ : '$' ID_START ID_CONTINUE*
+ ;
+
 SKIP_
  : ( SPACES | COMMENT | LINE_JOINING ) -> skip
  ;
@@ -117,10 +140,12 @@ fragment LINE_JOINING
  ;
 
 
-COLON   : ':';
-COMMA   : ',';
+COLON       : ':';
+COMMA       : ',';
+EQUAL       : '=';
+RIGHT_ARROW : '->';
 
-INT     : [0-9]+ ;
+NUM         : [0-9]+ ;
 
 /// id_start     ::=  <all characters in general categories Lu, Ll, Lt, Lm, Lo, Nl, the underscore, and characters with the Other_ID_Start property>
 fragment ID_START
