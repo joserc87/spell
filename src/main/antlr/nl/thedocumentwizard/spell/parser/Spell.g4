@@ -18,6 +18,8 @@ step
   : STEP STRING (COMMA STRING)? alias? COLON NEWLINE
     ( question
     | when
+    // Uncomment this to write advanced rules that will trigger always
+    // | metadata_assignment
     )*
   ;
 
@@ -57,7 +59,18 @@ control_type
   ;
 
 when
-  : WHEN 'CONDITION' COLON NEWLINE
+  : WHEN 'TRIGGER' COLON NEWLINE
+    ( metadata_assignment NEWLINE
+    | jump NEWLINE
+    )*
+  ;
+
+metadata_assignment
+  : METADATA EQUAL STRING
+  ;
+
+jump
+  : GOTO NAME
   ;
 
 literal
@@ -88,6 +101,7 @@ STEP            : 'step';
 AS              : 'as';
 WHEN            : 'when';
 REQUIRED        : 'required';
+GOTO            : 'goto';
 
 // Controls
 LABEL_TYPE      : 'label';

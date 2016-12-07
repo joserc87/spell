@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<xs:schema	targetNamespace="http://schemas.streamserve.com/documenttype/1.0"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified"
+			xmlns:doctype="http://schemas.streamserve.com/documenttype/1.0"
+			xmlns:xs="http://www.w3.org/2001/XMLSchema"
+			xmlns:pub="http://schemas.streamserve.com/public/1.0">
+	
+	<xs:annotation>
+		<xs:documentation xml:lang="en">
+			This schema describes the document type XML structure.
+		</xs:documentation>
+	</xs:annotation>
+	
+	<!-- Imports -->
+	<xs:import namespace="http://schemas.streamserve.com/public/1.0" schemaLocation="public.1.0.xsd"/>
+	
+	<!-- Element definitions -->
+	<xs:element name="strs">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				The root element of a standalone document type XML. Document type XML could also
+				be contained in a designcenter resource XML structure.
+			</xs:documentation>
+		</xs:annotation>
+		
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="doctype:documentTypes" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="documentTypes">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				Collection of document types, also the root element of the actual document type
+				structure as such.
+			</xs:documentation>
+		</xs:annotation>
+		
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="documentType" type="doctype:DocumentTypeType" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- Group and type definitions -->
+	<xs:simpleType name="VariableType">
+		<xs:restriction base="xs:string">
+			<xs:whiteSpace value="collapse"/>
+			<xs:pattern value="$.+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="DocumentTypeType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				Represents one document type.
+			</xs:documentation>
+		</xs:annotation>
+		
+		<!-- changed all to sequence in the original XML so arrays are generated -->
+		<xs:sequence>
+			<xs:element name="metadataTypes" type="doctype:MetadataTypesType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="samples" type="doctype:SamplesType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="metadataGroup" type="doctype:MetadataGroupType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="guid" type="pub:GUIDType" use="required" />
+		<xs:attribute name="revision" type="xs:unsignedInt" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="MetadataTypesType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				Describes the metadata present in one document type or metadata group.
+			</xs:documentation>
+		</xs:annotation>
+		
+		<xs:sequence>
+			<xs:element name="metadata" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation xml:lang="en">
+						Describes one metadata.
+					</xs:documentation>
+				</xs:annotation>
+				
+				<xs:complexType>
+					<xs:attribute name="name" type="xs:string" use="required"/>
+					<xs:attribute name="scope" type="xs:string" use="required"/>
+					<xs:attribute name="type" type="xs:Name" use="required"/>
+					<xs:attribute name="guid" type="pub:GUIDType" use="required"/>
+					<xs:attribute name="variable" type="doctype:VariableType" use="optional"/>
+					<xs:attribute name="text" type="xs:string" use="optional"/>
+					<xs:attribute name="archived" type="xs:boolean" use="optional" default="false"/>
+					<xs:attribute name="message" type="xs:boolean" use="optional" default="false"/>
+					<xs:attribute name="postprocess" type="xs:boolean" use="optional" default="false"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="SamplesType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				Describes the samples present in one document type or metadata group.
+			</xs:documentation>
+		</xs:annotation>
+		
+		<xs:sequence>
+			<xs:element name="sample" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation xml:lang="en">
+						Describes one sample. A sample has an optional annotation and a textual content pointing to a file.
+					</xs:documentation>
+				</xs:annotation>
+				
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="annotation" type="xs:string" use="optional"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="MetadataGroupType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				Describes a group of metadata and samples.
+			</xs:documentation>
+		</xs:annotation>
+		
+		<xs:all>
+			<xs:element name="metadataTypes" type="doctype:MetadataTypesType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="samples" type="doctype:SamplesType" minOccurs="0" maxOccurs="1"/>
+		</xs:all>
+		
+		<xs:attribute name="name" type="xs:string" use="optional" />
+		<xs:attribute name="guid" type="xs:string" use="optional" />
+	</xs:complexType>
+
+</xs:schema>

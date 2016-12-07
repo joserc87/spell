@@ -4,6 +4,9 @@ step "step number 1" as first_step:
     "Simple question"
     required string "mandatory string question" = "default value" -> $metadataName
     number "optional number question" = $metadataName
+    when TRIGGER:
+        goto step1
+        $metadata1 = "value"
 
 step "step number 2", "my group": # Inline comment
     label "" = "a label"

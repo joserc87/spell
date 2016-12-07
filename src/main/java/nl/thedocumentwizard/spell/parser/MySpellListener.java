@@ -51,17 +51,34 @@ public class MySpellListener extends SpellBaseListener {
      */
     protected Steptype getStep(SpellParser.StepContext ctx) {
         Steptype step = objectFactory.createSteptype();
+        // Step name and groupName
         step.setName(getString(ctx.STRING(0)));
         if (ctx.STRING().size() > 1) {
             step.setGroupName(getString(ctx.STRING(1)));
         }
+        // Questions:
         for (SpellParser.QuestionContext questionContext : ctx.question()) {
             if (step.getQuestions() == null) {
                 step.setQuestions(new ArrayOfWizardQuestion());
             }
             step.getQuestions().getQuestion().add(getQuestion(questionContext));
         }
+        // Conditions and Advanced rules
+        for (SpellParser.WhenContext whenContext : ctx.when()) {
+            parseWhen(whenContext, step, null);
+        }
         return step;
+    }
+
+    /**
+     * Parses a "when" block, recursively ("when" blocks can contain other blocks)
+     *
+     * @param ctx The context to parse, which contains the Trigger and the conditions/advancedrules
+     * @param step The step where to add the conditions and advanced rules
+     * @param parentTrigger The trigger of the parent "when". The new trigger will be AND {parentTrigger, newTrigger}
+     */
+    protected void parseWhen(SpellParser.WhenContext ctx, Steptype step, Trigger parentTrigger) {
+
     }
 
     /**
@@ -124,6 +141,10 @@ public class MySpellListener extends SpellBaseListener {
             return null;
         }
     }
+
+    ///////////////
+    // CONTROLS: //
+    ///////////////
 
     protected void setAbstractControl(SpellParser.QuestionContext ctx, AbstractControl control) {
         // Default value (control "question" = defautValue)

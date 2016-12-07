@@ -147,3 +147,23 @@ step "Rate this language" as RateStep:
   imported within a step (i.e. indented inside the step definition), should
   contain only controls, advanced rules or conditions, and should not contain
   other steps.
+
+### TODO:
+
+- [ ] Parse document types XML
+- [ ] Implement "when". When := WHEN trigger COLON ( jump | metadata\_assign )
+
+### Ideas:
+
+- Configuration files where we set the default attributes of some controls (e.g. number and date formatting)
+- Macros for Controls:
+  ```
+  def int:
+    number allowDecimals=false, step=1
+
+  def float2pos:
+    number allowDecimals=true, decimalPrecision=2, step="0.1", decimalSeparator=DOT
+
+  def myDate:
+    date format="xxx"
+  ```
