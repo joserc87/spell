@@ -129,7 +129,7 @@ public class MySpellListener extends SpellBaseListener {
     }
 
     private String getMetadataIDForName(String metadataName) {
-        return "00000000-0000-0000-0000-000000000000";
+        return "????????-????-????-????-????????????";
     }
 
     private String getMetadataName(TerminalNode node) {
