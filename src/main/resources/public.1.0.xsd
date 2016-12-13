@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<xs:schema	targetNamespace="http://schemas.streamserve.com/public/1.0"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified"
+			xmlns:strs="http://schemas.streamserve.com/public/1.0"
+			xmlns:xs="http://www.w3.org/2001/XMLSchema"
+			xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:gui="http://schemas.streamserve.com/gui/connector/1.0">
+	
+	<xs:annotation>
+		<xs:documentation xml:lang="en">
+			This schema contains common components that can be used in other schemas.
+		</xs:documentation>
+	</xs:annotation>
+	
+	<!-- Imports -->
+	<xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="xlink.attributes.1.0.xsd"/>
+	
+	<!-- Element definitions -->
+	<xs:element name="data" type="xs:string">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				This element is for use inside configuration elements for components (e.g. managers or services) to
+				signal that the components configuration is in plain text format and not in xml format.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	
+	<xs:element name="xlink" type="strs:XLinkType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				This element is for use inside configuration elements for components (e.g. managers or services) to
+				signal that the components configuration is located in a separate stream (file).
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	
+	<xs:element name="uid" type="strs:UIDDefinitionType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				This element is used to define short names for UID values. Every attribute or element that is of the type
+				UIDType (see below) can have a short name specification instead of specifying the complete URL of the UID.
+				The short name must start with a # sign followed by the name, e.g. #managementmanager. The configuration
+				reader will then lookup the uid element with a id attribute value of managementmanager and replace that with
+				the value attribute of the uid element. Note that the value element in turn can start with a # and then the following
+				name will also be replaced by the value from a new uid. Also note that the id that is searched for is the name up
+				until the first occurance of the / character (or to the end of the name if no such character exists), so
+				for example #manager/managementmanager/1.0 will be replaced by
+				http://schemas.streamserve.com/uid/manager/managementmanager/1.0 if the manager uid definition has a value of
+				http://schemas.streamserve.com/uid/manager. These uid:s can nest multiple steps.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	
+	<!-- Group and type definitions -->
+	<xs:attributeGroup name="TypeAttributeGroup">
+		<xs:attribute name="type" type="strs:UIDType" use="required">
+      <xs:annotation>
+        <xs:appinfo>
+          <gui:configuration visibility="hidden"/>
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+	</xs:attributeGroup>
+	
+	<xs:attributeGroup name="TypeTypenameAttributeGroup">
+		<xs:attributeGroup ref="strs:TypeAttributeGroup"/>
+		<xs:attribute name="typename" type="xs:anyURI" use="optional"/>
+	</xs:attributeGroup>
+	
+	<xs:complexType name="XLinkType">
+		<xs:attributeGroup ref="xlink:XLinkAttributeGroup"/>
+	</xs:complexType>
+	
+	<xs:complexType name="UIDDefinitionType">
+		<xs:attribute name="id" type="xs:string" use="required"/>
+		<xs:attribute name="value" type="xs:string" use="required"/>
+	</xs:complexType>
+	
+	<xs:simpleType name="UIDType">
+		<xs:restriction base="xs:string">
+			<xs:whiteSpace value="collapse"/>
+			<xs:pattern value="(\{[0-9a-fA-F]{8}(-[0-9a-fA-F]{8}){3}\})|([^\{].*)"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="GUIDType">
+		<xs:restriction base="xs:string">
+			<xs:whiteSpace value="collapse"/>
+			<xs:pattern value="[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="StreamType">
+		<xs:annotation>
+			<xs:documentation>
+				This type is currently not used, it is supposed to be used in schemas related to wsdl documents to signal to a
+				wsdl code generator that a text IStream pointer is requested as input or output from a web service.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="NonEmptyStringType">
+		<xs:annotation>
+			<xs:documentation xml:lang="en">
+				A standard string with a restriction that it cannot be empty.
+			</xs:documentation>
+		</xs:annotation>
+
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+		</xs:restriction>
+	</xs:simpleType>
+
+  <xs:simpleType name="AttributeEnumType">
+    <xs:annotation>
+      <xs:documentation>Enumeration of Attributes.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ID" />
+      <xs:enumeration value="Type" />
+      <xs:enumeration value="Name" />
+      <xs:enumeration value="Description" />
+      <xs:enumeration value="Version" />
+      <xs:enumeration value="Revision" />
+      <xs:enumeration value="CreationTime" />
+      <xs:enumeration value="ModifyTime" />
+      <xs:enumeration value="ExpiringTime" />
+      <xs:enumeration value="State" />
+      <xs:enumeration value="ServiceName" />
+      <xs:enumeration value="RuleName" />
+      <xs:enumeration value="RuleID" />
+      <xs:enumeration value="Comment" />
+      <xs:enumeration value="ErrorCode" />
+      <xs:enumeration value="ErrorMessage" />
+      <xs:enumeration value="Error" />
+      <xs:enumeration value="Shared" />
+      <xs:enumeration value="AdhocEnabled" />
+      <xs:enumeration value="TypeName" />
+      <xs:enumeration value="ExternalID" />
+      <xs:enumeration value="TemplateName" />
+      <xs:enumeration value="DocumentTypeID" />
+      <xs:enumeration value="ServiceVersion" />
+      <xs:enumeration value="DocumentAbstractionID" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="ExtendedAttributeEnumType">
+    <xs:annotation>
+      <xs:documentation>Choice of a enumeration value (wsto:AttributeEnumType) or a string (xsd:string) value.</xs:documentation>
+    </xs:annotation>
+    <xs:choice>
+      <xs:element name="enumValue" type="strs:AttributeEnumType">
+        <xs:annotation>
+          <xs:documentation>Enumeration value (wsto:AttributeEnumType).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="value" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Any value (as xsd:string).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="AttributeIDType">
+    <xs:annotation>
+      <xs:documentation>Attribute ID (can be either enumValue or value).</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="id" type="strs:ExtendedAttributeEnumType" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Attribute ID as enumValue or value.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="CustomAttributeIDType">
+    <xs:annotation>
+      <xs:documentation>Attribute ID.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="id" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Attribute ID.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ValueCollectionType">
+    <xs:annotation>
+      <xs:documentation>Collection of values.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="value" type="xs:string" minOccurs="1" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>One or more values.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="AttributeType">
+    <xs:annotation>
+      <xs:documentation>Attribute containing ID, name and a collection of values.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="strs:AttributeIDType">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Attribute name (optional).</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="values" type="strs:ValueCollectionType" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Collection of values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="CustomAttributeType">
+    <xs:annotation>
+      <xs:documentation>Attribute containing ID, name and a collection of values.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="strs:CustomAttributeIDType">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Attribute name (optional).</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="values" type="strs:ValueCollectionType" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Collection of values.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="AttributeCollectionType">
+    <xs:annotation>
+      <xs:documentation>List of attributes.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="attribute" type="strs:AttributeType" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Zero or more attributes.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="CustomAttributeCollectionType">
+    <xs:annotation>
+      <xs:documentation>List of attributes.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="attribute" type="strs:CustomAttributeType" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Zero or more attributes.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ErrorType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="messageID" type="xs:int" minOccurs="1" maxOccurs="1" >
+        <xs:annotation>
+          <xs:documentation>The log message ID</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="message" type="xs:string" minOccurs="1" maxOccurs="1" >
+        <xs:annotation>
+          <xs:documentation>The log message</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="errorCode" type="xs:string" minOccurs="1" maxOccurs="1" >
+        <xs:annotation>
+          <xs:documentation>Result ref</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="errorMessage" type="xs:string" minOccurs="1" maxOccurs="1" >
+        <xs:annotation>
+          <xs:documentation>Result ref text version</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ErrorDetailType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="threadID" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Thread ID</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="location" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Source location</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="timeStamp" type="xs:dateTime" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Error time stamp</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="callStack" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Call stack</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="FaultType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="error" type="strs:ErrorType" minOccurs="1" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation></xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="detail" type="strs:ErrorDetailType" minOccurs="1" maxOccurs="1" >
+          <xs:annotation>
+            <xs:documentation></xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <!--<xs:any minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Any element (optional)</xs:documentation>
+          </xs:annotation>
+        </xs:any>-->
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

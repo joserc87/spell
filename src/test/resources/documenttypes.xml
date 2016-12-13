@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<strs xmlns="http://schemas.streamserve.com/designcenterresource/2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <documentTypes xmlns="http://schemas.streamserve.com/documenttype/1.0">
+    <documentType xmlns="http://schemas.streamserve.com/documenttype/1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" name="TCFDemo" guid="f96680fd-e945-4d05-a977-e211106edbed" revision="18">
+      <metadataTypes />
+      <samples>
+        <sample annotation="">Sample.xml</sample>
+      </samples>
+      <metadataGroup name="STATIC" guid="STATIC">
+        <metadataTypes>
+          <metadata name="FixedMetaData.ExternalID" scope="BBC0626F-EE2C-47A9-BC02-D5CB4D15C438" type="xs:string" guid="7C52DDAF-0FA4-4845-88A1-4ECF8B63EABA" archived="true" />
+          <metadata name="FixedMetaData.Receiver" scope="BBC0626F-EE2C-47A9-BC02-D5CB4D15C438" type="xs:string" guid="0526456B-2F9D-400F-B847-1C7E103B5AE3" archived="true" />
+          <metadata name="FixedMetaData.Sender" scope="BBC0626F-EE2C-47A9-BC02-D5CB4D15C438" type="xs:string" guid="938CB835-58C1-4123-90D4-039172D7A325" archived="true" />
+          <metadata name="BlobInfo.ContentType" scope="BBC0626F-EE2C-47A9-BC02-D5CB4D15C438" type="xs:string" guid="118EA52C-567E-4369-9AC3-2EF14A8AE0A5" archived="true" />
+          <metadata name="BlobInfo.ExpiringDateTime" scope="BBC0626F-EE2C-47A9-BC02-D5CB4D15C438" type="xs:dateTime" guid="862BD02D-BB75-4125-BDCE-5377F9016895" archived="true" />
+          <metadata name="BlobInfo.TotalBlobSize" scope="BBC0626F-EE2C-47A9-BC02-D5CB4D15C438" type="xs:double" guid="CFFA8C19-3C46-48E1-A029-37A14DD27B3A" archived="true" />
+          <metadata name="Part.TrackerID" scope="BBC0626F-EE2C-47A9-BC02-D5CB4D15C438" type="xs:string" guid="0DB19BF7-9474-4785-A3DB-841A49F145D9" archived="true" />
+          <metadata name="Part.ApplicationDomainID" scope="BBC0626F-EE2C-47A9-BC02-D5CB4D15C438" type="xs:string" guid="C86E986C-2BD7-42E9-80D3-612C0D08A422" archived="true" />
+        </metadataTypes>
+        <samples />
+      </metadataGroup>
+      <metadataGroup name="String" guid="e45441be-b572-41d4-80af-c0f3c1478a86">
+        <metadataTypes>
+          <metadata name="String1" scope="" type="xs:string" guid="111ebf50-7198-422d-9b3a-182f868d9539" variable="$string1" archived="true" message="true" />
+          <metadata name="String2" scope="" type="xs:string" guid="86e67f9e-6b21-474e-827f-33acf6afe0b7" variable="$string2" archived="true" message="true" />
+          <metadata name="String3" scope="" type="xs:string" guid="9843d074-faa1-4915-84f0-e33877fb3678" variable="$string3" archived="true" message="true" />
+          <metadata name="String4" scope="" type="xs:string" guid="0194cb78-abac-45fa-a34d-992e8a7f7733" variable="$string4" archived="true" message="true" />
+          <metadata name="String5" scope="" type="xs:string" guid="1484ce45-35d6-44d4-afee-5125c8f5693a" variable="$string5" archived="true" message="true" />
+          <metadata name="String6" scope="" type="xs:string" guid="decbf3e0-6538-46da-93cc-3837291f167b" variable="$string6" archived="true" message="true" />
+          <metadata name="String7" scope="" type="xs:string" guid="93e1e582-c00e-4cc2-9dba-d6a7fbb2dac1" variable="$string7" archived="true" message="true" />
+          <metadata name="String8" scope="" type="xs:string" guid="1bdbf8c6-3b0d-4923-8692-f0f4d70171ed" variable="$string8" archived="true" message="true" />
+          <metadata name="String9" scope="" type="xs:string" guid="c5060dc7-f20d-4b6a-babc-474e3beb1cc6" variable="$string9" archived="true" message="true" />
+          <metadata name="String0" scope="" type="xs:string" guid="4d13733b-d381-4ac9-b45c-b02d756a98ae" variable="$string0" archived="true" message="true" />
+        </metadataTypes>
+        <samples />
+      </metadataGroup>
+      <metadataGroup name="Wizard Data" guid="87da3a36-1e45-432b-9017-7ed4af642dda">
+        <metadataTypes>
+          <metadata name="WizardUser" scope="" type="xs:string" guid="421a1420-e5bd-4310-bcf1-01bfbca4845e" variable="$WizardUser" archived="true" message="true" />
+          <metadata name="WizardName" scope="" type="xs:string" guid="9b4bccd7-d9ef-46f2-968e-89d0c1835d5d" variable="$WizardName" archived="true" message="true" />
+          <metadata name="WizardDocumentName" scope="" type="xs:string" guid="85ed4584-6a25-4a11-a564-bcc15665bb81" variable="$WizardDocumentName" archived="true" message="true" />
+          <metadata name="WizardDocumentDescription" scope="" type="xs:string" guid="25b695ff-20bc-47ac-ba52-73fcb425576e" variable="$WizardDocumentDescription" archived="true" message="true" />
+          <metadata name="WizardSearch" scope="" type="xs:string" guid="dd3c545f-2168-4264-ad63-49d6b766606d" variable="$WizardSearch" archived="true" message="true" />
+          <metadata name="WizardDepartmentID" scope="" type="xs:string" guid="2797febf-6ed9-492a-be95-80d11a1dbd1a" variable="$WizardDepartmentID" archived="true" message="true" />
+          <metadata name="WizardUserEmail" scope="" type="xs:string" guid="7654323D-B76D-4896-985A-B1A6589FD6AD" variable="$WizardUserEmail" archived="true" message="true" />
+          <metadata name="WizardUserFullName" scope="" type="xs:string" guid="BF874C78-E074-41D6-8878-E27269C46EAE" variable="$WizardUserFullName" archived="true" message="true" />
+          <metadata name="WizardOriginalAuthorLogonName" scope="" type="xs:string" guid="6E873B38-A1A9-485C-A8CE-70694563984F" variable="$WizardOriginalAuthorLogonName" archived="true" message="true" />
+          <metadata name="WizardOriginalAuthorFullName" scope="" type="xs:string" guid="9f9f1d07-7830-4b08-a958-67d2806323d9" variable="$WizardOriginalAuthorFullName" archived="true" message="true" />
+          <metadata name="WizardReassignedFrom" scope="" type="xs:string" guid="02E384B8-48FB-4E19-90A9-16C4658A7A94" variable="$WizardReassignedFrom" archived="true" message="true" />
+          <metadata name="WizardDepartmentName" scope="" type="xs:string" guid="FF8CEA22-DB5B-4C36-901D-5865240E0FFC" variable="$WizardDepartmentName" archived="true" message="true" />
+        </metadataTypes>
+        <samples />
+      </metadataGroup>
+      <metadataGroup name="WizardDevData" guid="a22fa3ef-16cf-4738-9761-303d8a1d5c22">
+        <metadataTypes>
+          <metadata name="stepID" scope="" type="xs:string" guid="c05fab6f-779a-4eb9-80e1-e3ebe9bf5c23" message="true" />
+          <metadata name="email" scope="" type="xs:string" guid="ceda0919-4eff-4fe1-9bb3-1234cb05977f" variable="$email" archived="true" message="true" />
+        </metadataTypes>
+        <samples />
+      </metadataGroup>
+      <metadataGroup name="Number" guid="a6174a9b-d39b-42c7-99b2-debcbf685ba3">
+        <metadataTypes>
+          <metadata name="Number1" scope="" type="xs:double" guid="3cd71a0e-93d4-4626-8bc4-e3bc561b6634" variable="$number1" message="true" />
+          <metadata name="Number2" scope="" type="xs:double" guid="530393c0-e3df-4a00-bdbc-e517360fb1da" variable="$number2" message="true" />
+          <metadata name="Number3" scope="" type="xs:double" guid="8378e961-749b-4fb7-a3ef-03f223e4a01e" variable="$number3" message="true" />
+          <metadata name="Number4" scope="" type="xs:double" guid="3143c721-7af6-450c-8c25-eeacb915f6d3" variable="$number4" message="true" />
+          <metadata name="Number5" scope="" type="xs:double" guid="fee51334-6cac-41c1-ace5-dcd7326143f7" variable="$number5" message="true" />
+          <metadata name="Number6" scope="" type="xs:double" guid="9677b006-4b12-4a07-96a8-c43125177b61" variable="$number6" message="true" />
+          <metadata name="Number7" scope="" type="xs:double" guid="fe162e1e-2bc6-47d7-a655-6008b8783c04" variable="$number7" message="true" />
+          <metadata name="Number8" scope="" type="xs:double" guid="dca9162e-b06b-45b6-bdde-bb5127f441a6" variable="$number8" message="true" />
+          <metadata name="Number9" scope="" type="xs:double" guid="1f722ebb-6130-496e-8272-c7ecf89f5cc6" variable="$number9" message="true" />
+          <metadata name="Number0" scope="" type="xs:double" guid="6a2c0b68-ec30-41b8-b7aa-b5d0213bce19" variable="$number0" message="true" />
+        </metadataTypes>
+        <samples />
+      </metadataGroup>
+      <metadataGroup name="Date" guid="191ec6ee-8e6c-4f2b-a8c8-be6e44ae6b0c">
+        <metadataTypes>
+          <metadata name="Date1" scope="" type="xs:dateTime" guid="9e13571b-62cd-4884-b946-2d145dcfc96d" variable="$date1" message="true" />
+          <metadata name="Date2" scope="" type="xs:dateTime" guid="701df9ce-1f55-47a1-accd-24a920e9bc8b" variable="$date2" message="true" />
+          <metadata name="Date3" scope="" type="xs:dateTime" guid="c4448c5b-5f76-4292-871f-40fd7d0b8054" variable="$date3" message="true" />
+          <metadata name="Date4" scope="" type="xs:dateTime" guid="e336dd5a-e0f0-4cd6-84c2-a9c047ff26f3" variable="$date4" message="true" />
+          <metadata name="Date5" scope="" type="xs:dateTime" guid="4a02ec75-1819-47ef-be11-ee533be471e5" variable="$date5" message="true" />
+          <metadata name="Date6" scope="" type="xs:dateTime" guid="26ac2b8e-989a-4eba-b5c2-71f32d4d162c" variable="$date6" message="true" />
+          <metadata name="Date7" scope="" type="xs:dateTime" guid="a600a2a2-41d2-4327-a404-8aefd9edf75d" variable="$date7" message="true" />
+          <metadata name="Date8" scope="" type="xs:dateTime" guid="2c796146-231b-4c9f-b44b-9ec1bae5fb1b" variable="$date8" message="true" />
+          <metadata name="Date9" scope="" type="xs:dateTime" guid="aef326c0-64bc-4957-93f5-c211fb5668fe" variable="$date9" message="true" />
+          <metadata name="Date0" scope="" type="xs:dateTime" guid="67b53f5b-a1e3-46da-aa06-e55c9fff3dba" variable="$date0" message="true" />
+        </metadataTypes>
+        <samples />
+      </metadataGroup>
+    </documentType>
+  </documentTypes>
+</strs>
