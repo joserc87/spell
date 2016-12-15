@@ -59,6 +59,16 @@ public class SpellParserTest {
 
     // STEPS
     @Test
+    public void should_parse_step_without_group_name() throws IOException {
+        SpellListener listener = parseStep("step 'step name':\n");
+        ArgumentCaptor<SpellParser.StepContext> ctx = ArgumentCaptor.forClass((SpellParser.StepContext.class));
+        verify(listener).enterStep(ctx.capture());
+
+        Assert.assertEquals("'step name'", ctx.getValue().STRING(0).getText());
+        Assert.assertNull(ctx.getValue().STRING(1));
+    }
+
+    @Test
     public void should_parse_step_with_group_name() throws IOException {
         SpellListener listener = parseStep("step \"step name\", 'group name':\n");
         ArgumentCaptor<SpellParser.StepContext> ctx = ArgumentCaptor.forClass((SpellParser.StepContext.class));
@@ -68,6 +78,7 @@ public class SpellParserTest {
         Assert.assertEquals("'group name'", ctx.getValue().STRING(1).getText());
     }
 
+    // QUESTIONS
     @Test
     public void should_parse_question_without_type_as_string_control() throws IOException {
         SpellListener listener = parseQuestion("'question name'\n");
