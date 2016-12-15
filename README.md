@@ -7,20 +7,19 @@ xml documents.
 
 ## Build:
 
-To build the project just run the gradle project:
-
-In a Unix like system (Mac OS X or linux):
+To build the project you need gradle installed, as well as the JDK:
 
 ```
- $ ./gradlew jar
+ $ gradle build jar
 ```
 
-In windows:
-```
- > gradlew.bat
-```
+Or open the IntelliJ Idea  and build the project manually.
 
-Or open the IntelliJ Idea project and build it from there.
+To run the test, invoke:
+
+```
+ $ gradle test
+```
 
 ## Syntax:
 
@@ -151,6 +150,7 @@ step "Rate this language" as RateStep:
 ### TODO:
 
 - [ ] Parse document types XML
+- [ ] Implement lists items, and subcontrols for radios and multis
 - [ ] Implement "when". When := WHEN trigger COLON ( jump | metadata\_assign )
 
 ### Ideas:
