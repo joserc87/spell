@@ -94,8 +94,8 @@ bool
   ;
 
 // Types
-TRUE            : 'true';
-FALSE           : 'false';
+TRUE            : 'yes' | 'true' | 'selected';
+FALSE           : 'no' | 'false' | 'unselected';
 
 STEP            : 'step';
 AS              : 'as';
