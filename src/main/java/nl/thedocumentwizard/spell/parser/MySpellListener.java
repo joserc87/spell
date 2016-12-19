@@ -94,36 +94,50 @@ public class MySpellListener extends SpellBaseListener {
             question.setRequired(true);
         }
         // Question name:
-        String name = getString(ctx.STRING());
+        String name = null;
+        if (ctx.string_control() != null) {
+            name = getString(ctx.string_control().STRING());
+        } else if (ctx.basic_control() != null) {
+            name = getString(ctx.basic_control().STRING());
+        } else if (ctx.upload_control() != null) {
+            name = getString(ctx.upload_control().STRING());
+        } else if (ctx.container_control() != null) {
+            name = getString(ctx.container_control().STRING());
+        }
         if (name != null) {
             question.setName(name);
         }
         // Check the control type
-        if (ctx.control_type() == null ||
-                ctx.control_type().STRING_TYPE() != null) { // by default, string
+        if (ctx.string_control() != null) { // by default, string
             question.setString(getStringControl(ctx));
-        } else if (ctx.control_type().LABEL_TYPE() != null) {
-            question.setLabel(getLabelControl(ctx));
-        } else if (ctx.control_type().EMAIL_TYPE() != null) {
-            question.setEmail(getEmailControl(ctx));
-        } else if (ctx.control_type().TEXT_TYPE() != null) {
-            question.setText(getTextControl(ctx));
-        } else if (ctx.control_type().DATE_TYPE() != null) {
-            question.setDate(getDateControl(ctx));
-        } else if (ctx.control_type().NUMBER_TYPE() != null) {
-            question.setNumber(getNumberControl(ctx));
-        } else if (ctx.control_type().CHECKBOX_TYPE() != null) {
-            question.setCheckbox(getCheckboxControl(ctx));
-        } else if (ctx.control_type().LIST_TYPE() != null) {
+        } else if (ctx.basic_control() != null) { // Basic controls
+            if (ctx.basic_control().basic_control_type().LABEL_TYPE() != null) {
+                question.setLabel(getLabelControl(ctx));
+            } else if (ctx.basic_control().basic_control_type().EMAIL_TYPE() != null) {
+                question.setEmail(getEmailControl(ctx));
+            } else if (ctx.basic_control().basic_control_type().TEXT_TYPE() != null) {
+                question.setText(getTextControl(ctx));
+            } else if (ctx.basic_control().basic_control_type().DATE_TYPE() != null) {
+                question.setDate(getDateControl(ctx));
+            } else if (ctx.basic_control().basic_control_type().NUMBER_TYPE() != null) {
+                question.setNumber(getNumberControl(ctx));
+            } else if (ctx.basic_control().basic_control_type().CHECKBOX_TYPE() != null) {
+                question.setCheckbox(getCheckboxControl(ctx));
+            }
+        } else if (ctx.list_control() != null) { // List controls
             question.setList(getListControl(ctx));
-        } else if (ctx.control_type().RADIO_TYPE() != null) {
-            question.setRadio(getRadioControl(ctx));
-        } else if (ctx.control_type().ATTACHMENT_TYPE() != null) {
-            question.setAttachment(getAttachmentControl(ctx));
-        } else if (ctx.control_type().IMAGE_TYPE() != null) {
-            question.setImage(getImageControl(ctx));
-        } else if (ctx.control_type().MULTI_TYPE() != null) {
-            question.setMulti(getMultiControl(ctx));
+        } else if (ctx.container_control() != null) { // Container controls
+            if (ctx.container_control().container_control_type().RADIO_TYPE() != null) {
+                question.setRadio(getRadioControl(ctx));
+            } else if (ctx.container_control().container_control_type().MULTI_TYPE() != null) {
+                question.setMulti(getMultiControl(ctx));
+            }
+        } else if (ctx.upload_control() != null) {
+            if (ctx.upload_control().upload_control_type().ATTACHMENT_TYPE() != null) {
+                question.setAttachment(getAttachmentControl(ctx));
+            } else if (ctx.upload_control().upload_control_type().IMAGE_TYPE() != null) {
+                question.setImage(getImageControl(ctx));
+            }
         }
         return question;
     }
@@ -146,7 +160,135 @@ public class MySpellListener extends SpellBaseListener {
     // CONTROLS: //
     ///////////////
 
-    protected void setAbstractControl(SpellParser.QuestionContext ctx, AbstractControl control) {
+    protected void setAbstractControl(SpellParser.String_controlContext ctx, AbstractControl control) {
+        // Default value (control "question" = defautValue)
+        if (ctx.default_value() != null) {
+            String value = null;
+            String metadataName = null;
+            if (ctx.default_value().literal() != null) {
+                // TODO: Check the control type (string, number, list, radio or bool)
+                String stringValue = getString(ctx.default_value().literal().STRING());
+                value = stringValue;
+            } else {
+                metadataName = getMetadataName(ctx.default_value().METADATA());
+            }
+            if (value != null) {
+                control.setDefaultValue(value);
+            } else if (metadataName != null) {
+                // TODO: Search the metadata ID for that name
+                control.setDefaultValueMetadataName(metadataName);
+                control.setDefaultValueMetadataID(getMetadataIDForName(metadataName));
+            }
+        }
+        // Metadata:
+        if (ctx.ctrl_metadata() != null) {
+            String metadataName = null;
+            if (ctx.ctrl_metadata().METADATA() != null) {
+                metadataName = getMetadataName(ctx.ctrl_metadata().METADATA());
+            }
+            if (metadataName != null) {
+                control.setMetadataName(metadataName);
+                control.setMetadataID(getMetadataIDForName(metadataName));
+            }
+        }
+    }
+    protected void setAbstractControl(SpellParser.Basic_controlContext ctx, AbstractControl control) {
+        // Default value (control "question" = defautValue)
+        if (ctx.default_value() != null) {
+            String value = null;
+            String metadataName = null;
+            if (ctx.default_value().literal() != null) {
+                // TODO: Check the control type (string, number, list, radio or bool)
+                String stringValue = getString(ctx.default_value().literal().STRING());
+                value = stringValue;
+            } else {
+                metadataName = getMetadataName(ctx.default_value().METADATA());
+            }
+            if (value != null) {
+                control.setDefaultValue(value);
+            } else if (metadataName != null) {
+                // TODO: Search the metadata ID for that name
+                control.setDefaultValueMetadataName(metadataName);
+                control.setDefaultValueMetadataID(getMetadataIDForName(metadataName));
+            }
+        }
+        // Metadata:
+        if (ctx.ctrl_metadata() != null) {
+            String metadataName = null;
+            if (ctx.ctrl_metadata().METADATA() != null) {
+                metadataName = getMetadataName(ctx.ctrl_metadata().METADATA());
+            }
+            if (metadataName != null) {
+                control.setMetadataName(metadataName);
+                control.setMetadataID(getMetadataIDForName(metadataName));
+            }
+        }
+    }
+    protected void setAbstractControl(SpellParser.List_controlContext ctx, AbstractControl control) {
+        // Default value (control "question" = defautValue)
+        if (ctx.default_value() != null) {
+            String value = null;
+            String metadataName = null;
+            if (ctx.default_value().literal() != null) {
+                // TODO: Check the control type (string, number, list, radio or bool)
+                String stringValue = getString(ctx.default_value().literal().STRING());
+                value = stringValue;
+            } else {
+                metadataName = getMetadataName(ctx.default_value().METADATA());
+            }
+            if (value != null) {
+                control.setDefaultValue(value);
+            } else if (metadataName != null) {
+                // TODO: Search the metadata ID for that name
+                control.setDefaultValueMetadataName(metadataName);
+                control.setDefaultValueMetadataID(getMetadataIDForName(metadataName));
+            }
+        }
+        // Metadata:
+        if (ctx.ctrl_metadata() != null) {
+            String metadataName = null;
+            if (ctx.ctrl_metadata().METADATA() != null) {
+                metadataName = getMetadataName(ctx.ctrl_metadata().METADATA());
+            }
+            if (metadataName != null) {
+                control.setMetadataName(metadataName);
+                control.setMetadataID(getMetadataIDForName(metadataName));
+            }
+        }
+    }
+    protected void setAbstractControl(SpellParser.Upload_controlContext ctx, AbstractControl control) {
+        // Default value (control "question" = defautValue)
+        if (ctx.default_value() != null) {
+            String value = null;
+            String metadataName = null;
+            if (ctx.default_value().literal() != null) {
+                // TODO: Check the control type (string, number, list, radio or bool)
+                String stringValue = getString(ctx.default_value().literal().STRING());
+                value = stringValue;
+            } else {
+                metadataName = getMetadataName(ctx.default_value().METADATA());
+            }
+            if (value != null) {
+                control.setDefaultValue(value);
+            } else if (metadataName != null) {
+                // TODO: Search the metadata ID for that name
+                control.setDefaultValueMetadataName(metadataName);
+                control.setDefaultValueMetadataID(getMetadataIDForName(metadataName));
+            }
+        }
+        // Metadata:
+        if (ctx.ctrl_metadata() != null) {
+            String metadataName = null;
+            if (ctx.ctrl_metadata().METADATA() != null) {
+                metadataName = getMetadataName(ctx.ctrl_metadata().METADATA());
+            }
+            if (metadataName != null) {
+                control.setMetadataName(metadataName);
+                control.setMetadataID(getMetadataIDForName(metadataName));
+            }
+        }
+    }
+    protected void setAbstractControl(SpellParser.Container_controlContext ctx, AbstractControl control) {
         // Default value (control "question" = defautValue)
         if (ctx.default_value() != null) {
             String value = null;
@@ -186,73 +328,78 @@ public class MySpellListener extends SpellBaseListener {
      */
     protected StringControl getStringControl(SpellParser.QuestionContext ctx) {
         StringControl control = objectFactory.createStringControl();
-        setAbstractControl(ctx, control);
+        if (ctx.string_control() != null) {
+            setAbstractControl(ctx.string_control(), control);
+        } else {
+            setAbstractControl(ctx.basic_control(), control);
+
+        }
         return control;
     }
 
     protected LabelControl getLabelControl(SpellParser.QuestionContext ctx) {
         LabelControl control = objectFactory.createLabelControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.basic_control(), control);
         return control;
     }
 
     protected EmailControl getEmailControl(SpellParser.QuestionContext ctx) {
         EmailControl control = objectFactory.createEmailControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.basic_control(), control);
         return control;
     }
 
     protected TextControl getTextControl(SpellParser.QuestionContext ctx) {
         TextControl control = objectFactory.createTextControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.basic_control(), control);
         return control;
     }
 
     protected DateControl getDateControl(SpellParser.QuestionContext ctx) {
         DateControl control = objectFactory.createDateControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.basic_control(), control);
         return control;
     }
 
     protected NumberControl getNumberControl(SpellParser.QuestionContext ctx) {
         NumberControl control = objectFactory.createNumberControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.basic_control(), control);
         return control;
     }
 
     protected CheckboxControl getCheckboxControl(SpellParser.QuestionContext ctx) {
         CheckboxControl control = objectFactory.createCheckboxControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.basic_control(), control);
         return control;
     }
 
     protected ListControl getListControl(SpellParser.QuestionContext ctx) {
         ListControl control = objectFactory.createListControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.list_control(), control);
         return control;
     }
 
     protected RadioControl getRadioControl(SpellParser.QuestionContext ctx) {
         RadioControl control = objectFactory.createRadioControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.container_control(), control);
         return control;
     }
 
     protected AttachmentFileControl getAttachmentControl(SpellParser.QuestionContext ctx) {
         AttachmentFileControl control = objectFactory.createAttachmentFileControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.upload_control(), control);
         return control;
     }
 
     protected ImageFileControl getImageControl(SpellParser.QuestionContext ctx) {
         ImageFileControl control = objectFactory.createImageFileControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.upload_control(), control);
         return control;
     }
 
     protected MultiControl getMultiControl(SpellParser.QuestionContext ctx) {
         MultiControl control = objectFactory.createMultiControl();
-        setAbstractControl(ctx, control);
+        setAbstractControl(ctx.container_control(), control);
         return control;
     }
 }

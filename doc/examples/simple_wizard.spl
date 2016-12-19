@@ -6,11 +6,15 @@ step "step number 1" as first_step:
     number "optional number question" = $metadataName
     when TRIGGER:
         goto step1
+        goto step2
         $metadata1 = "value"
 
 step "step number 2", "my group": # Inline comment
     label "" = "a label"
-    required list "a list"
+    required list "a list":
+        $m1
+        $m2 = $m3
+        "displayText" = "value"
 
 step "final step":
     image "image upload control"
