@@ -1,8 +1,6 @@
 package nl.thedocumentwizard.spell;
 
-import nl.thedocumentwizard.spell.parser.MySpellListener;
-import nl.thedocumentwizard.spell.parser.SpellLexer;
-import nl.thedocumentwizard.spell.parser.SpellParser;
+import nl.thedocumentwizard.spell.parser.*;
 import nl.thedocumentwizard.wizardconfiguration.MyObjectFactory;
 import nl.thedocumentwizard.wizardconfiguration.WizardConfiguration;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.ArrayOfSteptype;
@@ -42,7 +40,10 @@ public class Main {
 
     public static void parseFile(File inputFile, File outputFile) throws IOException {
 
+        // Dependencies
+        ParsingHelper helper = new ParsingHelper();
         ObjectFactory factory = new MyObjectFactory();
+        ControlParser controlParser = new ControlParser(factory, helper);
 
         // Get our lexer
         SpellLexer lexer = new SpellLexer(new ANTLRInputStream(new FileInputStream(inputFile)));
@@ -58,7 +59,7 @@ public class Main {
 
         // Walk it and attach our listener
         ParseTreeWalker walker = new ParseTreeWalker();
-        MySpellListener listener = new MySpellListener(factory);
+        MySpellListener listener = new MySpellListener(factory, controlParser, helper);
         walker.walk(listener, wizardSentenceContext);
 
         // Marshall the wizard:
