@@ -8,6 +8,13 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 public class ParsingHelper {
 
     /**
+     * Default constructor
+     */
+    public ParsingHelper() {
+
+    }
+
+    /**
      * Parses a string with single or double quotes and returns the content
      * 
      * @param quotedString A string with the format "content"

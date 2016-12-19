@@ -166,7 +166,6 @@ public class MySpellListener extends SpellBaseListener {
             String value = null;
             String metadataName = null;
             if (ctx.default_value().literal() != null) {
-                // TODO: Check the control type (string, number, list, radio or bool)
                 String stringValue = getString(ctx.default_value().literal().STRING());
                 value = stringValue;
             } else {
@@ -175,7 +174,6 @@ public class MySpellListener extends SpellBaseListener {
             if (value != null) {
                 control.setDefaultValue(value);
             } else if (metadataName != null) {
-                // TODO: Search the metadata ID for that name
                 control.setDefaultValueMetadataName(metadataName);
                 control.setDefaultValueMetadataID(getMetadataIDForName(metadataName));
             }
@@ -198,7 +196,6 @@ public class MySpellListener extends SpellBaseListener {
             String value = null;
             String metadataName = null;
             if (ctx.default_value().literal() != null) {
-                // TODO: Check the control type (string, number, list, radio or bool)
                 String stringValue = getString(ctx.default_value().literal().STRING());
                 value = stringValue;
             } else {
@@ -230,7 +227,6 @@ public class MySpellListener extends SpellBaseListener {
             String value = null;
             String metadataName = null;
             if (ctx.default_value().literal() != null) {
-                // TODO: Check the control type (string, number, list, radio or bool)
                 String stringValue = getString(ctx.default_value().literal().STRING());
                 value = stringValue;
             } else {
@@ -262,7 +258,6 @@ public class MySpellListener extends SpellBaseListener {
             String value = null;
             String metadataName = null;
             if (ctx.default_value().literal() != null) {
-                // TODO: Check the control type (string, number, list, radio or bool)
                 String stringValue = getString(ctx.default_value().literal().STRING());
                 value = stringValue;
             } else {
@@ -294,7 +289,6 @@ public class MySpellListener extends SpellBaseListener {
             String value = null;
             String metadataName = null;
             if (ctx.default_value().literal() != null) {
-                // TODO: Check the control type (string, number, list, radio or bool)
                 String stringValue = getString(ctx.default_value().literal().STRING());
                 value = stringValue;
             } else {

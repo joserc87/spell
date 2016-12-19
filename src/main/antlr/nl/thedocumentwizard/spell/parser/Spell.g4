@@ -150,8 +150,12 @@ basic_control
 // List
 list_control
   : LIST_TYPE STRING? default_value? ctrl_metadata? COLON NEWLINE INDENT
-      (string_or_metadata (EQUAL string_or_metadata)? NEWLINE)+
+      (list_item)+
     DEDENT
+  ;
+
+list_item
+  : string_or_metadata (EQUAL string_or_metadata)? NEWLINE
   ;
 
 // Image, File
