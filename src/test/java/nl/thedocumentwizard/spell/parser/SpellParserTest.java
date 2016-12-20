@@ -217,6 +217,29 @@ public class SpellParserTest {
     }
 
     @Test
+    public void should_parse_list_question() throws IOException {
+        SpellListener listener = parseQuestion("list 'q' = 1 -> $metadataName:\n" +
+                "   '1'\n" +
+                "   '2' = 'second item'\n" +
+                "   $meta3 = $meta4\n" +
+                "\n");
+        ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
+        verify(listener).enterQuestion(ctx.capture());
+
+        Assert.assertNotNull(ctx.getValue().list_control());
+        Assert.assertEquals("'q'", ctx.getValue().list_control().STRING().getText());
+        Assert.assertEquals("1", ctx.getValue().list_control().default_value().literal().NUM().getText());
+        Assert.assertEquals("$metadataName", ctx.getValue().list_control().ctrl_metadata().METADATA().getText());
+        // Check items:
+        Assert.assertEquals(3, ctx.getValue().list_control().list_item().size());
+        Assert.assertEquals("'1'", ctx.getValue().list_control().list_item(0).string_or_metadata(0).STRING().getText());
+        Assert.assertEquals("'2'", ctx.getValue().list_control().list_item(1).string_or_metadata(0).STRING().getText());
+        Assert.assertEquals("'second item'", ctx.getValue().list_control().list_item(1).string_or_metadata(1).STRING().getText());
+        Assert.assertEquals("$meta3", ctx.getValue().list_control().list_item(2).string_or_metadata(0).METADATA().getText());
+        Assert.assertEquals("$meta4", ctx.getValue().list_control().list_item(2).string_or_metadata(1).METADATA().getText());
+    }
+
+    @Test
     public void should_parse_step_with_questions() throws IOException {
         SpellListener listener = parseStep("step 'step name', 'step group':\n" +
                 "  'question name'\n" +
