@@ -71,7 +71,7 @@ public class ControlParser {
         return m;
     }
 
-    public void setListControl(SpellParser.List_controlContext ctx, ListControl control) {
+    public void setListControl(SpellParser.Named_list_controlContext ctx, ListControl control) {
         if (ctx.list_item() != null) {
             ArrayOfListItem items = control.getItems();
             if (items == null && ctx.list_item().size() > 0) {
@@ -91,49 +91,180 @@ public class ControlParser {
         }
     }
 
+    public void setListControl(SpellParser.Unnamed_list_controlContext ctx, ListControl control) {
+        if (ctx.list_item() != null) {
+            ArrayOfListItem items = control.getItems();
+            if (items == null && ctx.list_item().size() > 0) {
+                items = new ArrayOfListItem();
+                control.setItems(items);
+            }
+            for (SpellParser.List_itemContext li : ctx.list_item()) {
+                ListItem item = new ListItem();
+                if (li.string_or_metadata(1) != null) { // 2 string_or_metadata : displayText = value
+                    item.setDisplayText(stringOrMetadataToExplicitWizardMetadata(li.string_or_metadata(0)));
+                    item.setValue(stringOrMetadataToExplicitWizardMetadata(li.string_or_metadata(1)));
+                } else { // 1 string_or_metadata : value
+                    item.setValue(stringOrMetadataToExplicitWizardMetadata(li.string_or_metadata(0)));
+                }
+                items.getItem().add(item);
+            }
+        }
+    }
+
+    public void setRadioControl(SpellParser.Named_container_controlContext ctx, RadioControl control) {
+        if (ctx.sub_control() != null) {
+            ArrayOfChoice1 subControls = control.getItems();
+            if (subControls == null && ctx.sub_control().size() > 0) {
+                subControls = new ArrayOfChoice1();
+                control.setItems(subControls);
+            }
+            for (SpellParser.Sub_controlContext subControlCtx : ctx.sub_control()) {
+                AbstractControl subControl = this.getControl(subControlCtx);
+                subControls.getTextOrCheckboxOrAttachment().add(subControl);
+            }
+        }
+    }
+
+    public void setRadioControl(SpellParser.Unnamed_container_controlContext ctx, RadioControl control) {
+        if (ctx.sub_control() != null) {
+            ArrayOfChoice1 subControls = control.getItems();
+            if (subControls == null && ctx.sub_control().size() > 0) {
+                subControls = new ArrayOfChoice1();
+                control.setItems(subControls);
+            }
+            for (SpellParser.Sub_controlContext subControlCtx : ctx.sub_control()) {
+                AbstractControl subControl = this.getControl(subControlCtx);
+                subControls.getTextOrCheckboxOrAttachment().add(subControl);
+            }
+        }
+    }
+
+    public void setMultiControl(SpellParser.Named_container_controlContext ctx, MultiControl control) {
+        if (ctx.sub_control() != null) {
+            ArrayOfChoice2 subControls = control.getControls();
+            if (subControls == null && ctx.sub_control().size() > 0) {
+                subControls = new ArrayOfChoice2();
+                control.setControls(subControls);
+            }
+            for (SpellParser.Sub_controlContext subControlCtx : ctx.sub_control()) {
+                AbstractControl subControl = this.getControl(subControlCtx);
+                subControls.getTextOrNumberOrAttachment().add(subControl);
+            }
+        }
+    }
+
+    public void setMultiControl(SpellParser.Unnamed_container_controlContext ctx, MultiControl control) {
+        if (ctx.sub_control() != null) {
+            ArrayOfChoice2 subControls = control.getControls();
+            if (subControls == null && ctx.sub_control().size() > 0) {
+                subControls = new ArrayOfChoice2();
+                control.setControls(subControls);
+            }
+            for (SpellParser.Sub_controlContext subControlCtx : ctx.sub_control()) {
+                AbstractControl subControl = this.getControl(subControlCtx);
+                subControls.getTextOrNumberOrAttachment().add(subControl);
+            }
+        }
+    }
+
     public AbstractControl getControl(SpellParser.QuestionContext ctx) {
         AbstractControl control = null;
         Object controlContext = null;
         // Check the control type
-        if (ctx.string_control() != null) { // by default, string
+        if (ctx.named_string_control() != null) { // by default, string
             control = objectFactory.createStringControl();
-            controlContext = ctx.string_control();
-        } else if (ctx.basic_control() != null) { // Basic controls
-            if (ctx.basic_control().basic_control_type().STRING_TYPE() != null) {
+            controlContext = ctx.named_string_control();
+        } else if (ctx.named_basic_control() != null) { // Basic controls
+            if (ctx.named_basic_control().basic_control_type().STRING_TYPE() != null) {
                 control = objectFactory.createStringControl();
-            } else if (ctx.basic_control().basic_control_type().LABEL_TYPE() != null) {
+            } else if (ctx.named_basic_control().basic_control_type().LABEL_TYPE() != null) {
                 control = objectFactory.createLabelControl();
-            } else if (ctx.basic_control().basic_control_type().EMAIL_TYPE() != null) {
+            } else if (ctx.named_basic_control().basic_control_type().EMAIL_TYPE() != null) {
                 control = objectFactory.createEmailControl();
-            } else if (ctx.basic_control().basic_control_type().TEXT_TYPE() != null) {
+            } else if (ctx.named_basic_control().basic_control_type().TEXT_TYPE() != null) {
                 control = objectFactory.createTextControl();
-            } else if (ctx.basic_control().basic_control_type().DATE_TYPE() != null) {
+            } else if (ctx.named_basic_control().basic_control_type().DATE_TYPE() != null) {
                 control = objectFactory.createDateControl();
-            } else if (ctx.basic_control().basic_control_type().NUMBER_TYPE() != null) {
+            } else if (ctx.named_basic_control().basic_control_type().NUMBER_TYPE() != null) {
                 control = objectFactory.createNumberControl();
-            } else if (ctx.basic_control().basic_control_type().CHECKBOX_TYPE() != null) {
+            } else if (ctx.named_basic_control().basic_control_type().CHECKBOX_TYPE() != null) {
                 control = objectFactory.createCheckboxControl();
             }
-            controlContext = ctx.basic_control();
-        } else if (ctx.list_control() != null) { // List controls
+            controlContext = ctx.named_basic_control();
+        } else if (ctx.named_list_control() != null) { // List controls
             ListControl listControl;
             control = listControl = objectFactory.createListControl();
-            controlContext = ctx.list_control();
-            this.setListControl(ctx.list_control(), listControl);
-        } else if (ctx.container_control() != null) { // Container controls
-            if (ctx.container_control().container_control_type().RADIO_TYPE() != null) {
-                control = objectFactory.createRadioControl();
-            } else if (ctx.container_control().container_control_type().MULTI_TYPE() != null) {
-                control = objectFactory.createMultiControl();
+            controlContext = ctx.named_list_control();
+            this.setListControl(ctx.named_list_control(), listControl);
+        } else if (ctx.named_container_control() != null) { // Container controls
+            if (ctx.named_container_control().container_control_type().RADIO_TYPE() != null) {
+                RadioControl radioControl;
+                control = radioControl = objectFactory.createRadioControl();
+                this.setRadioControl(ctx.named_container_control(), radioControl);
+            } else if (ctx.named_container_control().container_control_type().MULTI_TYPE() != null) {
+                MultiControl multiControl;
+                control = multiControl = objectFactory.createMultiControl();
+                this.setMultiControl(ctx.named_container_control(), multiControl);
             }
-            controlContext = ctx.container_control();
-        } else if (ctx.upload_control() != null) {
-            if (ctx.upload_control().upload_control_type().ATTACHMENT_TYPE() != null) {
+            controlContext = ctx.named_container_control();
+        } else if (ctx.named_upload_control() != null) {
+            if (ctx.named_upload_control().upload_control_type().ATTACHMENT_TYPE() != null) {
                 control = objectFactory.createAttachmentFileControl();
-            } else if (ctx.upload_control().upload_control_type().IMAGE_TYPE() != null) {
+            } else if (ctx.named_upload_control().upload_control_type().IMAGE_TYPE() != null) {
                 control = objectFactory.createImageFileControl();
             }
-            controlContext = ctx.upload_control();
+            controlContext = ctx.named_upload_control();
+        }
+        if (controlContext != null) {
+            this.setAbstractControl(controlContext, control);
+        }
+        return control;
+    }
+
+    public AbstractControl getControl(SpellParser.Sub_controlContext ctx) {
+        AbstractControl control = null;
+        Object controlContext = null;
+        // Check the control type
+        if (ctx.unnamed_basic_control() != null) { // Basic controls
+            if (ctx.unnamed_basic_control().basic_control_type().STRING_TYPE() != null) {
+                control = objectFactory.createStringControl();
+            } else if (ctx.unnamed_basic_control().basic_control_type().LABEL_TYPE() != null) {
+                control = objectFactory.createLabelControl();
+            } else if (ctx.unnamed_basic_control().basic_control_type().EMAIL_TYPE() != null) {
+                control = objectFactory.createEmailControl();
+            } else if (ctx.unnamed_basic_control().basic_control_type().TEXT_TYPE() != null) {
+                control = objectFactory.createTextControl();
+            } else if (ctx.unnamed_basic_control().basic_control_type().DATE_TYPE() != null) {
+                control = objectFactory.createDateControl();
+            } else if (ctx.unnamed_basic_control().basic_control_type().NUMBER_TYPE() != null) {
+                control = objectFactory.createNumberControl();
+            } else if (ctx.unnamed_basic_control().basic_control_type().CHECKBOX_TYPE() != null) {
+                control = objectFactory.createCheckboxControl();
+            }
+            controlContext = ctx.unnamed_basic_control();
+        } else if (ctx.unnamed_list_control() != null) { // List controls
+            ListControl listControl;
+            control = listControl = objectFactory.createListControl();
+            controlContext = ctx.unnamed_list_control();
+            this.setListControl(ctx.unnamed_list_control(), listControl);
+        } else if (ctx.unnamed_container_control() != null) { // Container controls
+            if (ctx.unnamed_container_control().container_control_type().RADIO_TYPE() != null) {
+                RadioControl radioControl;
+                control = radioControl = objectFactory.createRadioControl();
+                this.setRadioControl(ctx.unnamed_container_control(), radioControl);
+            } else if (ctx.unnamed_container_control().container_control_type().MULTI_TYPE() != null) {
+                MultiControl multiControl;
+                control = multiControl = objectFactory.createMultiControl();
+                this.setMultiControl(ctx.unnamed_container_control(), multiControl);
+            }
+            controlContext = ctx.unnamed_container_control();
+        } else if (ctx.unnamed_upload_control() != null) {
+            if (ctx.unnamed_upload_control().upload_control_type().ATTACHMENT_TYPE() != null) {
+                control = objectFactory.createAttachmentFileControl();
+            } else if (ctx.unnamed_upload_control().upload_control_type().IMAGE_TYPE() != null) {
+                control = objectFactory.createImageFileControl();
+            }
+            controlContext = ctx.unnamed_upload_control();
         }
         if (controlContext != null) {
             this.setAbstractControl(controlContext, control);

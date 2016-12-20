@@ -129,27 +129,40 @@ alias
 
 question
   : REQUIRED?
-    ( string_control
-    | basic_control // Label, String, Email, Text, Date, Number or Checkbox
-    | list_control
-    | upload_control
-    | container_control // Radio or Multi
+    ( named_string_control
+    | named_basic_control // Label, String, Email, Text, Date, Number or Checkbox
+    | named_list_control
+    | named_upload_control
+    | named_container_control // Radio or Multi
     )
   ;
 
+// Named controls contain the name of the question (e.g. list "question name" = default value)
+// Unnamed controls do not have the name of the question and can only be placed inside a control container
+
 // When basic control but control type is not defined -> string control
-string_control
+named_string_control
   : STRING default_value? ctrl_metadata? alias? NEWLINE
   ;
 
 // Label, String, Email, Text, Date, Number or Checkbox
-basic_control
+named_basic_control
   : basic_control_type STRING? default_value? ctrl_metadata? alias? NEWLINE
+  ;
+unnamed_basic_control
+  : basic_control_type default_value? ctrl_metadata? alias? NEWLINE
   ;
 
 // List
-list_control
-  : LIST_TYPE STRING? default_value? ctrl_metadata? alias? COLON NEWLINE INDENT
+named_list_control
+  : LIST_TYPE STRING? default_value? ctrl_metadata? alias? COLON NEWLINE
+    INDENT
+      (list_item)+
+    DEDENT
+  ;
+unnamed_list_control
+  : LIST_TYPE default_value? ctrl_metadata? alias? COLON NEWLINE
+    INDENT
       (list_item)+
     DEDENT
   ;
@@ -159,15 +172,32 @@ list_item
   ;
 
 // Image, File
-upload_control
+named_upload_control
   : upload_control_type STRING? default_value? ctrl_metadata? alias?
+  ;
+unnamed_upload_control
+  : upload_control_type default_value? ctrl_metadata? alias?
   ;
 
 // Radio, Multi
-container_control
-  : container_control_type STRING? default_value? ctrl_metadata? alias? COLON NEWLINE INDENT
-      'controls'
+named_container_control
+  : container_control_type STRING? default_value? ctrl_metadata? alias? COLON NEWLINE
+    INDENT
+      sub_control+
     DEDENT
+  ;
+unnamed_container_control
+  : container_control_type default_value? ctrl_metadata? alias? COLON NEWLINE
+    INDENT
+      sub_control+
+    DEDENT
+  ;
+
+sub_control
+  : unnamed_basic_control // Label, String, Email, Text, Date, Number or Checkbox
+  | unnamed_list_control
+  | unnamed_upload_control
+  | unnamed_container_control // Radio or Multi
   ;
 
 string_or_metadata
@@ -176,7 +206,7 @@ string_or_metadata
   ;
 
 default_value
-  : EQUAL (literal | METADATA)
+  : EQUAL (literal | NAME | METADATA)
   ;
 
 ctrl_metadata

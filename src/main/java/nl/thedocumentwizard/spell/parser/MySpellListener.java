@@ -85,14 +85,14 @@ public class MySpellListener extends SpellBaseListener {
         }
         // Question name:
         String name = null;
-        if (ctx.string_control() != null) {
-            name = helper.getString(ctx.string_control().STRING());
-        } else if (ctx.basic_control() != null) {
-            name = helper.getString(ctx.basic_control().STRING());
-        } else if (ctx.upload_control() != null) {
-            name = helper.getString(ctx.upload_control().STRING());
-        } else if (ctx.container_control() != null) {
-            name = helper.getString(ctx.container_control().STRING());
+        if (ctx.named_string_control() != null) {
+            name = helper.getString(ctx.named_string_control().STRING());
+        } else if (ctx.named_basic_control() != null) {
+            name = helper.getString(ctx.named_basic_control().STRING());
+        } else if (ctx.named_upload_control() != null) {
+            name = helper.getString(ctx.named_upload_control().STRING());
+        } else if (ctx.named_container_control() != null) {
+            name = helper.getString(ctx.named_container_control().STRING());
         }
         if (name != null) {
             question.setName(name);

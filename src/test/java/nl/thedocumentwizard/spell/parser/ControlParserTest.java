@@ -1,10 +1,7 @@
 package nl.thedocumentwizard.spell.parser;
 
 import jdk.nashorn.internal.ir.Terminal;
-import nl.thedocumentwizard.wizardconfiguration.jaxb.AbstractControl;
-import nl.thedocumentwizard.wizardconfiguration.jaxb.ListControl;
-import nl.thedocumentwizard.wizardconfiguration.jaxb.ObjectFactory;
-import nl.thedocumentwizard.wizardconfiguration.jaxb.StringControl;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,6 +34,20 @@ public class ControlParserTest {
         return ctx;
     }
 
+    public SpellParser.Default_valueContext mockOfStringDefaultValue(String s) {
+        SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
+        SpellParser.LiteralContext STRING = mockOfStringLiteral(s);
+        when(defVal.literal()).thenReturn(STRING);
+        return defVal;
+    }
+
+    public SpellParser.Default_valueContext mockOfMetadataDefaultValue(String m) {
+        SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
+        TerminalNode METADATA = mockOfTerminalNode(m);
+        when(defVal.METADATA()).thenReturn(METADATA);
+        return defVal;
+    }
+
     @Before
     public void becauseThereIsAParser() {
         ObjectFactory factory = new ObjectFactory();
@@ -49,14 +60,10 @@ public class ControlParserTest {
     @Test
     public void setAbstractControl_should_set_string_default_value() throws Exception {
         // Because context contains the default value as a literal
-        SpellParser.String_controlContext ctx = mock(SpellParser.String_controlContext.class);
+        SpellParser.Named_string_controlContext ctx = mock(SpellParser.Named_string_controlContext.class);
 
-        SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
+        SpellParser.Default_valueContext defVal = mockOfStringDefaultValue("'default value'");
         when(ctx.default_value()).thenReturn(defVal);
-
-        // Default value is a string literal
-        SpellParser.LiteralContext STRING = mockOfStringLiteral("'default value'");
-        when(defVal.literal()).thenReturn(STRING);
 
         // When setAbstractControl
         StringControl control = new StringControl();
@@ -69,14 +76,10 @@ public class ControlParserTest {
     @Test
     public void setAbstractControl_should_set_metadata_default_value() throws Exception {
         // Because context contains the default value metadata
-        SpellParser.String_controlContext ctx = mock(SpellParser.String_controlContext.class);
+        SpellParser.Named_string_controlContext ctx = mock(SpellParser.Named_string_controlContext.class);
 
-        SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
+        SpellParser.Default_valueContext defVal = mockOfMetadataDefaultValue("$metadataName");
         when(ctx.default_value()).thenReturn(defVal);
-
-        // Default value is a metadata
-        TerminalNode node = mockOfTerminalNode("$metadataName");
-        when(defVal.METADATA()).thenReturn(node);
 
         // When setAbstractControl
         StringControl control = new StringControl();
@@ -89,7 +92,7 @@ public class ControlParserTest {
     @Test
     public void setAbstractControl_should_set_metadata_value() throws Exception {
         // Because context contains the control metadata
-        SpellParser.String_controlContext ctx = mock(SpellParser.String_controlContext.class);
+        SpellParser.Named_string_controlContext ctx = mock(SpellParser.Named_string_controlContext.class);
 
         SpellParser.Ctrl_metadataContext ctrlMetadata = mock(SpellParser.Ctrl_metadataContext.class);
         when(ctx.ctrl_metadata()).thenReturn(ctrlMetadata);
@@ -108,15 +111,11 @@ public class ControlParserTest {
     @Test
     public void getControl_should_set_default_value_and_metadata_for_string_control() {
         SpellParser.QuestionContext ctx = mock(SpellParser.QuestionContext.class);
-        SpellParser.String_controlContext controlContext = mock(SpellParser.String_controlContext.class);
-        when(ctx.string_control()).thenReturn(controlContext);
+        SpellParser.Named_string_controlContext controlContext = mock(SpellParser.Named_string_controlContext.class);
+        when(ctx.named_string_control()).thenReturn(controlContext);
 
-        SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
+        SpellParser.Default_valueContext defVal = mockOfStringDefaultValue("'default value'");
         when(controlContext.default_value()).thenReturn(defVal);
-
-        // Default value is a string literal
-        SpellParser.LiteralContext STRING = mockOfStringLiteral("'default value'");
-        when(defVal.literal()).thenReturn(STRING);
 
         SpellParser.Ctrl_metadataContext ctrlMetadata = mock(SpellParser.Ctrl_metadataContext.class);
         when(controlContext.ctrl_metadata()).thenReturn(ctrlMetadata);
@@ -148,20 +147,13 @@ public class ControlParserTest {
     @Test
     public void getListControl_should_add_list_items() {
         SpellParser.QuestionContext ctx = mock(SpellParser.QuestionContext.class);
-        SpellParser.List_controlContext controlContext = mock(SpellParser.List_controlContext.class);
-        when(ctx.list_control()).thenReturn(controlContext);
+        SpellParser.Named_list_controlContext controlContext = mock(SpellParser.Named_list_controlContext.class);
+        when(ctx.named_list_control()).thenReturn(controlContext);
 
         // No default value nor metadata.
         // List contains items
-        List<SpellParser.List_itemContext> items = new ArrayList<SpellParser.List_itemContext>();
+        List<SpellParser.List_itemContext> items = new ArrayList<>();
         when(controlContext.list_item()).thenReturn(items);
-
-        // Values of the items
-        TerminalNode listDisplayValue1 = mockOfTerminalNode("\"displayValue1\"");
-        TerminalNode listValue1 = mockOfTerminalNode("\"value1\"");
-        TerminalNode listMetadataDisplayValue2 = mockOfTerminalNode("$metadata1");
-        TerminalNode listMetadataValue2 = mockOfTerminalNode("$metadata2");
-        TerminalNode listMetadatavalue3 = mockOfTerminalNode("$metadata3");
 
         SpellParser.String_or_metadataContext displayValue1 = createString_or_metadataContext(mockOfTerminalNode("'displayValue1'"), null);
         SpellParser.String_or_metadataContext value1 = createString_or_metadataContext(mockOfTerminalNode("'value1'"), null);
@@ -199,5 +191,105 @@ public class ControlParserTest {
         Assert.assertEquals("metadata1", listControl.getItems().getItem().get(1).getDisplayText().getMetadataName());
         Assert.assertEquals("metadata2", listControl.getItems().getItem().get(1).getValue().getMetadataName());
         Assert.assertEquals("metadata3", listControl.getItems().getItem().get(2).getValue().getMetadataName());
+    }
+
+    @Test
+    public void getRadioControl_should_add_sub_items() {
+        // Question -> Radio
+        // radio:
+        //   label = 'option 1'
+        //   multi:
+        //     label = 'option 2'
+        //     string
+
+        SpellParser.QuestionContext ctx = mock(SpellParser.QuestionContext.class);
+        SpellParser.Named_container_controlContext controlContext = mock(SpellParser.Named_container_controlContext.class);
+        when(ctx.named_container_control()).thenReturn(controlContext);
+        // Root is a radio
+        SpellParser.Container_control_typeContext radio_control_typeContext = mock(SpellParser.Container_control_typeContext.class);
+        TerminalNode radio_type = mockOfTerminalNode("radio");
+        when(radio_control_typeContext.RADIO_TYPE()).thenReturn(radio_type);
+        when(controlContext.container_control_type()).thenReturn(radio_control_typeContext);
+
+        // No default value nor metadata.
+        // Radio contains subcontrols
+        List<SpellParser.Sub_controlContext> subcontrols = new ArrayList<>();
+        when(controlContext.sub_control()).thenReturn(subcontrols);
+
+        // Sub-control 1 : label
+        SpellParser.Basic_control_typeContext label_control_typeContext = mock(SpellParser.Basic_control_typeContext.class);
+        TerminalNode label_type = mockOfTerminalNode("label");
+        when(label_control_typeContext.LABEL_TYPE()).thenReturn(label_type);
+
+        SpellParser.Unnamed_basic_controlContext label_ctx = mock(SpellParser.Unnamed_basic_controlContext.class);
+        when(label_ctx.basic_control_type()).thenReturn(label_control_typeContext);
+        SpellParser.Default_valueContext defVal = mockOfStringDefaultValue("'option 1'");
+        when(label_ctx.default_value()).thenReturn(defVal);
+
+        // Sub-control 2 : multi
+        SpellParser.Container_control_typeContext multi_control_typeContext = mock(SpellParser.Container_control_typeContext.class);
+        TerminalNode multi_type = mockOfTerminalNode("multi");
+        when(multi_control_typeContext.MULTI_TYPE()).thenReturn(multi_type);
+
+        SpellParser.Unnamed_container_controlContext multi_ctx = mock(SpellParser.Unnamed_container_controlContext.class);
+        when(multi_ctx.container_control_type()).thenReturn(multi_control_typeContext);
+
+        // Multi contains subsubcontrols
+        List<SpellParser.Sub_controlContext> subsubcontrols = new ArrayList<>();
+        when(multi_ctx.sub_control()).thenReturn(subsubcontrols);
+
+        // Sub-sub-control 2.1: label
+        SpellParser.Unnamed_basic_controlContext sub_label_ctx = mock(SpellParser.Unnamed_basic_controlContext.class);
+        when(sub_label_ctx.basic_control_type()).thenReturn(label_control_typeContext);
+        SpellParser.Default_valueContext sub_label_defVal = mockOfStringDefaultValue("'option 2'");
+        when(sub_label_ctx.default_value()).thenReturn(sub_label_defVal);
+
+        // Sub-sub-control 2.2: string
+        SpellParser.Basic_control_typeContext string_control_typeContext = mock(SpellParser.Basic_control_typeContext.class);
+        TerminalNode string_type = mockOfTerminalNode("string");
+        when(string_control_typeContext.STRING_TYPE()).thenReturn(string_type);
+
+        SpellParser.Unnamed_basic_controlContext sub_string_ctx = mock(SpellParser.Unnamed_basic_controlContext.class);
+        when(sub_string_ctx.basic_control_type()).thenReturn(string_control_typeContext);
+
+        // Add subcontrols
+        SpellParser.Sub_controlContext label_subcontrol = mock(SpellParser.Sub_controlContext.class);
+        when(label_subcontrol.unnamed_basic_control()).thenReturn(label_ctx);
+
+        SpellParser.Sub_controlContext multi_subcontrol = mock(SpellParser.Sub_controlContext.class);
+        when(multi_subcontrol.unnamed_container_control()).thenReturn(multi_ctx);
+
+        SpellParser.Sub_controlContext sub_label_subcontrol = mock(SpellParser.Sub_controlContext.class);
+        when(sub_label_subcontrol.unnamed_basic_control()).thenReturn(sub_label_ctx);
+
+        SpellParser.Sub_controlContext sub_string_subcontrol = mock(SpellParser.Sub_controlContext.class);
+        when(sub_string_subcontrol.unnamed_basic_control()).thenReturn(sub_string_ctx);
+
+        subcontrols.add(label_subcontrol);
+        subcontrols.add(multi_subcontrol);
+
+        subsubcontrols.add(sub_label_subcontrol);
+        subsubcontrols.add(sub_string_subcontrol);
+
+        // When setAbstractControl
+        AbstractControl control = controlParser.getControl(ctx);
+
+        // THEN it should return a radio control
+        Assert.assertEquals(RadioControl.class, control.getClass());
+
+        // The control should have 3 items
+        RadioControl radioControl = (RadioControl) control;
+
+        List<AbstractControl> subControls = radioControl.getItems().getTextOrCheckboxOrAttachment();
+        Assert.assertEquals(2, subControls.size());
+        LabelControl label = (LabelControl) subControls.get(0);
+        Assert.assertEquals("option 1", label.getDefaultValue());
+        MultiControl multi = (MultiControl) subControls.get(1);
+
+        List<AbstractControl> subSubControls = multi.getControls().getTextOrNumberOrAttachment();
+        Assert.assertEquals(2, subSubControls.size());
+        LabelControl sublabel = (LabelControl) subSubControls.get(0);
+        Assert.assertEquals("option 2", sublabel.getDefaultValue());
+        StringControl substring = (StringControl) subSubControls.get(1);
     }
 }

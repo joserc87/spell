@@ -85,9 +85,9 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertNotNull(ctx.getValue().string_control());
-        Assert.assertEquals("'question name'", ctx.getValue().string_control().STRING().getText());
-        Assert.assertEquals("myAlias", ctx.getValue().string_control().alias().NAME().getText());
+        Assert.assertNotNull(ctx.getValue().named_string_control());
+        Assert.assertEquals("'question name'", ctx.getValue().named_string_control().STRING().getText());
+        Assert.assertEquals("myAlias", ctx.getValue().named_string_control().alias().NAME().getText());
     }
 
     // CONTROL TYPES
@@ -98,9 +98,9 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("label", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("''", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("'label text'", ctx.getValue().basic_control().default_value().literal().STRING().getText());
+        Assert.assertEquals("label", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("''", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("'label text'", ctx.getValue().named_basic_control().default_value().literal().STRING().getText());
     }
 
     // String
@@ -110,9 +110,9 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("string", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("'q'", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("'default value'", ctx.getValue().basic_control().default_value().literal().STRING().getText());
+        Assert.assertEquals("string", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("'q'", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("'default value'", ctx.getValue().named_basic_control().default_value().literal().STRING().getText());
     }
 
     // Email
@@ -122,9 +122,9 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("email", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("'your email here'", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("$metadataName", ctx.getValue().basic_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("email", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("'your email here'", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("$metadataName", ctx.getValue().named_basic_control().ctrl_metadata().METADATA().getText());
     }
 
     // Text
@@ -134,10 +134,10 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("text", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("'text field'", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("$inputMetadata", ctx.getValue().basic_control().default_value().METADATA().getText());
-        Assert.assertEquals("$outputMetadata", ctx.getValue().basic_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("text", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("'text field'", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("$inputMetadata", ctx.getValue().named_basic_control().default_value().METADATA().getText());
+        Assert.assertEquals("$outputMetadata", ctx.getValue().named_basic_control().ctrl_metadata().METADATA().getText());
     }
 
     // Date
@@ -147,10 +147,10 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("date", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("'q'", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("$inputMetadata", ctx.getValue().basic_control().default_value().METADATA().getText());
-        Assert.assertEquals("$outputMetadata", ctx.getValue().basic_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("date", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("'q'", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("$inputMetadata", ctx.getValue().named_basic_control().default_value().METADATA().getText());
+        Assert.assertEquals("$outputMetadata", ctx.getValue().named_basic_control().ctrl_metadata().METADATA().getText());
     }
 
     // Number
@@ -160,10 +160,10 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("number", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("'q'", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("123", ctx.getValue().basic_control().default_value().literal().NUM().getText());
-        Assert.assertEquals("$metadataName", ctx.getValue().basic_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("number", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("'q'", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("123", ctx.getValue().named_basic_control().default_value().literal().NUM().getText());
+        Assert.assertEquals("$metadataName", ctx.getValue().named_basic_control().ctrl_metadata().METADATA().getText());
     }
 
     // Checkbox
@@ -173,12 +173,12 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("checkbox", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("'q'", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("selected", ctx.getValue().basic_control().default_value().literal().bool().TRUE().getText());
-        Assert.assertNull(ctx.getValue().basic_control().default_value().literal().bool().FALSE());
-        Assert.assertEquals("$metadataName", ctx.getValue().basic_control().ctrl_metadata().METADATA().getText());
-        Assert.assertEquals("myAlias", ctx.getValue().basic_control().alias().NAME().getText());
+        Assert.assertEquals("checkbox", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("'q'", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("selected", ctx.getValue().named_basic_control().default_value().literal().bool().TRUE().getText());
+        Assert.assertNull(ctx.getValue().named_basic_control().default_value().literal().bool().FALSE());
+        Assert.assertEquals("$metadataName", ctx.getValue().named_basic_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("myAlias", ctx.getValue().named_basic_control().alias().NAME().getText());
     }
     @Test
     public void should_parse_checkbox_question_with_default_unselected() throws IOException {
@@ -186,11 +186,11 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("checkbox", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("'q'", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("unselected", ctx.getValue().basic_control().default_value().literal().bool().FALSE().getText());
-        Assert.assertNull(ctx.getValue().basic_control().default_value().literal().bool().TRUE());
-        Assert.assertEquals("$metadataName", ctx.getValue().basic_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("checkbox", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("'q'", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("unselected", ctx.getValue().named_basic_control().default_value().literal().bool().FALSE().getText());
+        Assert.assertNull(ctx.getValue().named_basic_control().default_value().literal().bool().TRUE());
+        Assert.assertEquals("$metadataName", ctx.getValue().named_basic_control().ctrl_metadata().METADATA().getText());
     }
 
     @Test
@@ -199,11 +199,11 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("checkbox", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("'q'", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("yes", ctx.getValue().basic_control().default_value().literal().bool().TRUE().getText());
-        Assert.assertNull(ctx.getValue().basic_control().default_value().literal().bool().FALSE());
-        Assert.assertEquals("$metadataName", ctx.getValue().basic_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("checkbox", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("'q'", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("yes", ctx.getValue().named_basic_control().default_value().literal().bool().TRUE().getText());
+        Assert.assertNull(ctx.getValue().named_basic_control().default_value().literal().bool().FALSE());
+        Assert.assertEquals("$metadataName", ctx.getValue().named_basic_control().ctrl_metadata().METADATA().getText());
     }
     @Test
     public void should_parse_checkbox_question_with_default_no() throws IOException {
@@ -211,11 +211,11 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertEquals("checkbox", ctx.getValue().basic_control().basic_control_type().getText());
-        Assert.assertEquals("'q'", ctx.getValue().basic_control().STRING().getText());
-        Assert.assertEquals("no", ctx.getValue().basic_control().default_value().literal().bool().FALSE().getText());
-        Assert.assertNull(ctx.getValue().basic_control().default_value().literal().bool().TRUE());
-        Assert.assertEquals("$metadataName", ctx.getValue().basic_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("checkbox", ctx.getValue().named_basic_control().basic_control_type().getText());
+        Assert.assertEquals("'q'", ctx.getValue().named_basic_control().STRING().getText());
+        Assert.assertEquals("no", ctx.getValue().named_basic_control().default_value().literal().bool().FALSE().getText());
+        Assert.assertNull(ctx.getValue().named_basic_control().default_value().literal().bool().TRUE());
+        Assert.assertEquals("$metadataName", ctx.getValue().named_basic_control().ctrl_metadata().METADATA().getText());
     }
 
     @Test
@@ -228,18 +228,98 @@ public class SpellParserTest {
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
-        Assert.assertNotNull(ctx.getValue().list_control());
-        Assert.assertEquals("'q'", ctx.getValue().list_control().STRING().getText());
-        Assert.assertEquals("1", ctx.getValue().list_control().default_value().literal().NUM().getText());
-        Assert.assertEquals("$metadataName", ctx.getValue().list_control().ctrl_metadata().METADATA().getText());
-        Assert.assertEquals("myAlias", ctx.getValue().list_control().alias().NAME().getText());
+        Assert.assertNotNull(ctx.getValue().named_list_control());
+        Assert.assertEquals("'q'", ctx.getValue().named_list_control().STRING().getText());
+        Assert.assertEquals("1", ctx.getValue().named_list_control().default_value().literal().NUM().getText());
+        Assert.assertEquals("$metadataName", ctx.getValue().named_list_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("myAlias", ctx.getValue().named_list_control().alias().NAME().getText());
         // Check items:
-        Assert.assertEquals(3, ctx.getValue().list_control().list_item().size());
-        Assert.assertEquals("'1'", ctx.getValue().list_control().list_item(0).string_or_metadata(0).STRING().getText());
-        Assert.assertEquals("'2'", ctx.getValue().list_control().list_item(1).string_or_metadata(0).STRING().getText());
-        Assert.assertEquals("'second item'", ctx.getValue().list_control().list_item(1).string_or_metadata(1).STRING().getText());
-        Assert.assertEquals("$meta3", ctx.getValue().list_control().list_item(2).string_or_metadata(0).METADATA().getText());
-        Assert.assertEquals("$meta4", ctx.getValue().list_control().list_item(2).string_or_metadata(1).METADATA().getText());
+        Assert.assertEquals(3, ctx.getValue().named_list_control().list_item().size());
+        Assert.assertEquals("'1'", ctx.getValue().named_list_control().list_item(0).string_or_metadata(0).STRING().getText());
+        Assert.assertEquals("'2'", ctx.getValue().named_list_control().list_item(1).string_or_metadata(0).STRING().getText());
+        Assert.assertEquals("'second item'", ctx.getValue().named_list_control().list_item(1).string_or_metadata(1).STRING().getText());
+        Assert.assertEquals("$meta3", ctx.getValue().named_list_control().list_item(2).string_or_metadata(0).METADATA().getText());
+        Assert.assertEquals("$meta4", ctx.getValue().named_list_control().list_item(2).string_or_metadata(1).METADATA().getText());
+    }
+
+    @Test
+    public void should_parse_radio_question() throws IOException {
+        SpellListener listener = parseQuestion(
+                "required radio 'q' = radioYes -> $metadataName as myAlias:\n" +
+                        "   label = 'yes' as radioYes\n" +
+                        "   multi as radioNo:\n" +
+                        "       label = 'no'\n" +
+                        "       string\n" +
+                        "   list:\n" +
+                        "       $meta1\n" +
+                        "       'item2' = $meta2\n" +
+                        "\n");
+        ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
+        verify(listener).enterQuestion(ctx.capture());
+
+        Assert.assertNotNull(ctx.getValue().named_container_control().container_control_type().RADIO_TYPE());
+        Assert.assertEquals("'q'", ctx.getValue().named_container_control().STRING().getText());
+        Assert.assertEquals("radioYes", ctx.getValue().named_container_control().default_value().NAME().getText());
+        Assert.assertEquals("$metadataName", ctx.getValue().named_container_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("myAlias", ctx.getValue().named_container_control().alias().NAME().getText());
+        // Check radio items:
+        Assert.assertEquals(3, ctx.getValue().named_container_control().sub_control().size());
+
+        // label = 'yes' as radioYes
+        Assert.assertNotNull(ctx.getValue().named_container_control().sub_control(0).unnamed_basic_control().basic_control_type().LABEL_TYPE());
+        Assert.assertEquals("'yes'", ctx.getValue().named_container_control().sub_control(0).unnamed_basic_control().default_value().literal().STRING().getText());
+        Assert.assertEquals("radioYes", ctx.getValue().named_container_control().sub_control(0).unnamed_basic_control().alias().NAME().getText());
+
+        // multi as radioNo:
+        SpellParser.Unnamed_container_controlContext multi = ctx.getValue().named_container_control().sub_control(1).unnamed_container_control();
+        Assert.assertNotNull(multi.container_control_type().MULTI_TYPE());
+        Assert.assertEquals("radioNo", multi.alias().NAME().getText());
+        //   label = 'no'
+        Assert.assertNotNull(multi.sub_control(0).unnamed_basic_control().basic_control_type().LABEL_TYPE());
+        Assert.assertEquals("'no'", multi.sub_control(0).unnamed_basic_control().default_value().literal().STRING().getText());
+        //   string
+        Assert.assertNotNull(multi.sub_control(1).unnamed_basic_control().basic_control_type().STRING_TYPE());
+
+        // list
+        SpellParser.Unnamed_list_controlContext list = ctx.getValue().named_container_control().sub_control(2).unnamed_list_control();
+        Assert.assertNotNull(list);
+
+        Assert.assertEquals(2, list.list_item().size());
+        Assert.assertEquals("$meta1", list.list_item(0).string_or_metadata(0).METADATA().getText());
+        Assert.assertEquals("'item2'", list.list_item(1).string_or_metadata(0).STRING().getText());
+        Assert.assertEquals("$meta2", list.list_item(1).string_or_metadata(1).METADATA().getText());
+    }
+
+    @Test
+    public void should_parse_multi_question() throws IOException {
+        SpellListener listener = parseQuestion(
+                "multi 'q':\n" +
+                "   label = 'text'\n" +
+                "   radio:\n" +
+                "       label = 'yes'\n" +
+                "       label = 'no'\n" +
+                "\n");
+        ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
+        verify(listener).enterQuestion(ctx.capture());
+
+        Assert.assertNotNull(ctx.getValue().named_container_control().container_control_type().MULTI_TYPE());
+        Assert.assertEquals("'q'", ctx.getValue().named_container_control().STRING().getText());
+        // Check radio items:
+        Assert.assertEquals(2, ctx.getValue().named_container_control().sub_control().size());
+
+        // label = 'text'
+        Assert.assertNotNull(ctx.getValue().named_container_control().sub_control(0).unnamed_basic_control().basic_control_type().LABEL_TYPE());
+        Assert.assertEquals("'text'", ctx.getValue().named_container_control().sub_control(0).unnamed_basic_control().default_value().literal().STRING().getText());
+
+        // radio:
+        SpellParser.Unnamed_container_controlContext radio = ctx.getValue().named_container_control().sub_control(1).unnamed_container_control();
+        Assert.assertNotNull(radio.container_control_type().RADIO_TYPE());
+        //   label = 'yes'
+        Assert.assertNotNull(radio.sub_control(0).unnamed_basic_control().basic_control_type().LABEL_TYPE());
+        Assert.assertEquals("'yes'", radio.sub_control(0).unnamed_basic_control().default_value().literal().STRING().getText());
+        //   label = 'no'
+        Assert.assertNotNull(radio.sub_control(1).unnamed_basic_control().basic_control_type().LABEL_TYPE());
+        Assert.assertEquals("'no'", radio.sub_control(1).unnamed_basic_control().default_value().literal().STRING().getText());
     }
 
     @Test
@@ -254,8 +334,8 @@ public class SpellParserTest {
         Assert.assertEquals("'step group'", ctx.getValue().STRING(1).getText());
 
         Assert.assertEquals(2, ctx.getValue().question().size());
-        Assert.assertEquals("'question name'", ctx.getValue().question(0).string_control().STRING().getText());
-        Assert.assertEquals("'another question'", ctx.getValue().question(1).string_control().STRING().getText());
+        Assert.assertEquals("'question name'", ctx.getValue().question(0).named_string_control().STRING().getText());
+        Assert.assertEquals("'another question'", ctx.getValue().question(1).named_string_control().STRING().getText());
     }
 
 }
