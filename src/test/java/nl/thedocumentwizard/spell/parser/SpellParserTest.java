@@ -81,12 +81,13 @@ public class SpellParserTest {
     // QUESTIONS
     @Test
     public void should_parse_question_without_type() throws IOException {
-        SpellListener listener = parseQuestion("'question name'\n");
+        SpellListener listener = parseQuestion("'question name' as myAlias\n");
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
         Assert.assertNotNull(ctx.getValue().string_control());
         Assert.assertEquals("'question name'", ctx.getValue().string_control().STRING().getText());
+        Assert.assertEquals("myAlias", ctx.getValue().string_control().alias().NAME().getText());
     }
 
     // CONTROL TYPES
@@ -168,7 +169,7 @@ public class SpellParserTest {
     // Checkbox
     @Test
     public void should_parse_checkbox_question_with_default_selected() throws IOException {
-        SpellListener listener = parseQuestion("checkbox 'q' = selected -> $metadataName\n");
+        SpellListener listener = parseQuestion("checkbox 'q' = selected -> $metadataName as myAlias\n");
         ArgumentCaptor<SpellParser.QuestionContext> ctx = ArgumentCaptor.forClass((SpellParser.QuestionContext.class));
         verify(listener).enterQuestion(ctx.capture());
 
@@ -177,6 +178,7 @@ public class SpellParserTest {
         Assert.assertEquals("selected", ctx.getValue().basic_control().default_value().literal().bool().TRUE().getText());
         Assert.assertNull(ctx.getValue().basic_control().default_value().literal().bool().FALSE());
         Assert.assertEquals("$metadataName", ctx.getValue().basic_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("myAlias", ctx.getValue().basic_control().alias().NAME().getText());
     }
     @Test
     public void should_parse_checkbox_question_with_default_unselected() throws IOException {
@@ -218,7 +220,7 @@ public class SpellParserTest {
 
     @Test
     public void should_parse_list_question() throws IOException {
-        SpellListener listener = parseQuestion("list 'q' = 1 -> $metadataName:\n" +
+        SpellListener listener = parseQuestion("list 'q' = 1 -> $metadataName as myAlias:\n" +
                 "   '1'\n" +
                 "   '2' = 'second item'\n" +
                 "   $meta3 = $meta4\n" +
@@ -230,6 +232,7 @@ public class SpellParserTest {
         Assert.assertEquals("'q'", ctx.getValue().list_control().STRING().getText());
         Assert.assertEquals("1", ctx.getValue().list_control().default_value().literal().NUM().getText());
         Assert.assertEquals("$metadataName", ctx.getValue().list_control().ctrl_metadata().METADATA().getText());
+        Assert.assertEquals("myAlias", ctx.getValue().list_control().alias().NAME().getText());
         // Check items:
         Assert.assertEquals(3, ctx.getValue().list_control().list_item().size());
         Assert.assertEquals("'1'", ctx.getValue().list_control().list_item(0).string_or_metadata(0).STRING().getText());
