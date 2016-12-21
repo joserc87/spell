@@ -64,6 +64,11 @@ public class Main {
 
         // Marshall the wizard:
         WizardConfiguration wizard = (WizardConfiguration) listener.getWizard();
+
+        // Postprocess the wizard:
+        PostProcessor postProcessor = new PostProcessor();
+        postProcessor.assignStepIDs(wizard);
+
         wizard.marshall(outputFile, true);
     }
 
