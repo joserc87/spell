@@ -44,6 +44,7 @@ public class Main {
         ParsingHelper helper = new ParsingHelper();
         ObjectFactory factory = new MyObjectFactory();
         ControlParser controlParser = new ControlParser(factory, helper);
+        MetadataStore metadataStore = new MetadataStore();
 
         // Get our lexer
         SpellLexer lexer = new SpellLexer(new ANTLRInputStream(new FileInputStream(inputFile)));
@@ -68,6 +69,7 @@ public class Main {
         // Postprocess the wizard:
         PostProcessor postProcessor = new PostProcessor();
         postProcessor.assignStepIDs(wizard);
+        postProcessor.assignMetadataIDs(wizard, metadataStore);
 
         wizard.marshall(outputFile, true);
     }
