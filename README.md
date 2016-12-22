@@ -31,7 +31,7 @@ step "This is the first step":
     "First question"
 
     # Controls can have a default value
-    date "When is your birthdate?" = "7/7/87"
+    date "What is your birthdate?" = "7/7/87"
 
     # The default value can be a metadata too
     label "Metadata value:" = $myMetadata1
@@ -149,9 +149,14 @@ step "Rate this language" as RateStep:
 
 ### TODO:
 
-- [ ] Parse document types XML
-- [ ] Implement lists items, and subcontrols for radios and multis
-- [ ] Implement "when". When := WHEN trigger COLON ( jump | metadata\_assign )
+- [X] Parse document types XML
+- [X] Implement lists items, and subcontrols for radios and multis
+- [ ] Implement triggers for conditions and advanced rules.
+- [ ] Implement goto S and $m = "Val", not only under "when" but also inside
+  step, as default next step and allways triggered advanced rules
+- [ ] Set IDs for Questions and controls automatically
+- [ ] Use the alias to link steps and controls, and set the ID based on the
+  alias
 
 ### Ideas:
 

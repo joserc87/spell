@@ -180,11 +180,11 @@ public class Main {
             } else {
                 unknownArgs.add(arg);
             }
-            if (unknownArgs.size() > 0) {
-                for (String s : unknownArgs) {
-                    System.err.println("Uknown argument '" + s + "'");
-                    return false;
-                }
+        }
+        if (unknownArgs.size() > 0) {
+            for (String s : unknownArgs) {
+                System.err.println("Uknown argument '" + s + "'");
+                return false;
             }
         }
 

@@ -173,10 +173,10 @@ list_item
 
 // Image, File
 named_upload_control
-  : upload_control_type STRING? default_value? ctrl_metadata? alias?
+  : upload_control_type STRING? default_value? ctrl_metadata? alias? NEWLINE
   ;
 unnamed_upload_control
-  : upload_control_type default_value? ctrl_metadata? alias?
+  : upload_control_type default_value? ctrl_metadata? alias? NEWLINE
   ;
 
 // Radio, Multi
