@@ -29,7 +29,6 @@ public class MySpellListener extends SpellBaseListener {
         for (SpellParser.StepContext stepContext : ctx.step()) {
             this.wizard.getSteps().getStep().add(this.getStep(stepContext));
         }
-        System.out.println("Wizard parsed");
     }
 
 
@@ -125,19 +124,5 @@ public class MySpellListener extends SpellBaseListener {
             question.setImage((ImageFileControl) control);
         }
         return question;
-    }
-
-    private String getMetadataIDForName(String metadataName) {
-        return "????????-????-????-????-????????????";
-    }
-
-    private String getMetadataName(TerminalNode node) {
-        if (node != null) {
-            String $metadataName = node.getText();
-            assert ($metadataName != null && $metadataName.length() > 1 && $metadataName.charAt(0) == '$');
-            return $metadataName.substring(1);
-        } else {
-            return null;
-        }
     }
 }

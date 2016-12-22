@@ -13,6 +13,7 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 /**
  * Adds functionality to the JAXB class
@@ -28,17 +29,18 @@ public class WizardConfiguration extends WizardDecorator {
      *
      * Like marshall(File, boolean), but passing false for prettyPrint
      */
-    public boolean marshall(File wizardFile) {
-        return this.marshall(wizardFile, false);
+    public boolean marshall(OutputStream os) {
+        return this.marshall(os, false, null);
     }
     /**
      * Writes a wizard into an XML file.
      *
-     * @param wizardFile The file to write
+     * @param os The output stream to write the XML
      * @param prettyPrint Output a formatted XML? false by default
+     * @param comments The comments to output in the preamble of the XML. Pass null to omit the comments.
      * @category IO
      */
-    public boolean marshall(File wizardFile, boolean prettyPrint) {
+    public boolean marshall(OutputStream os, boolean prettyPrint, String comments) {
         Wizard wizard = this.getDecoratedWizard();
         boolean ok = false;
         try{
@@ -50,15 +52,20 @@ public class WizardConfiguration extends WizardDecorator {
 
             //Create a new org.dom4j.io.XMLWriter that will serve as the
             //ContentHandler for our filter.
-            XMLStreamWriter strWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(new FileOutputStream(wizardFile), "UTF-8");
+            XMLStreamWriter strWriter = XMLOutputFactory.newInstance().createXMLStreamWriter(os, "UTF-8");
             if (prettyPrint) {
                 strWriter = new IndentingXMLStreamWriter(strWriter);
+            }
+            if (comments != null) {
+                m.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+                strWriter.writeProcessingInstruction("xml version=\"1.0\"");
+                strWriter.writeCharacters("\n");
+                strWriter.writeComment(comments);
+                strWriter.writeCharacters("\n");
             }
             //Tell JAXB to marshall to the filter which in turn will call the writer
             m.marshal(wizard, strWriter);
             ok = true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (XMLStreamException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

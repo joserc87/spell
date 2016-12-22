@@ -1,1 +1,1 @@
-gradle build && ./run.sh doc/examples/simple_wizard.spl output.xml
+gradle build && ./run.sh doc/examples/simple_wizard.spl -pretty-print -o output.xml

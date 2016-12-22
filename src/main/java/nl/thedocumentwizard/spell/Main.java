@@ -19,35 +19,52 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by jose on 04/12/2016.
  */
 public class Main {
-    public static void generateSampleXML(String args[]) {
-        ObjectFactory factory = new MyObjectFactory();
-        WizardConfiguration wizard = (WizardConfiguration) factory.createWizard();
-        wizard.setName("My wizard");
-        wizard.setSteps(factory.createArrayOfSteptype());
 
-        wizard.getSteps().getStep().add(factory.createSteptype());
-        wizard.getSteps().getStep().add(factory.createSteptype());
-        System.out.println("Marshalling Wizard");
-        wizard.marshall(new File("output.xml"));
-        System.out.println("Finished");
+    InputStream inputStream;
+    OutputStream outputStream;
+    MetadataStore metadataStore;
+    boolean prettyPrint;
+
+    public void printUsage() {
+        System.out.println(
+                ////////////////////////////////////////////////////////////////////////////
+                "Usage: java -jar spell.jar <inputFile.spl> [options...]\n\n" +
+                "where options include:\n" +
+                "    -h[elp]        Displays this help message\n" +
+                "    -o[utput] <output file>\n" +
+                "                   Output the document type to a file\n" +
+                "    -pretty-print  Beautify the output XML\n" +
+                "    -document-type <documentType.xml>\n" +
+                "                   Uses the document type xml.\n"
+                ////////////////////////////////////////////////////////////////////////////
+        );
     }
 
-    public static void parseFile(File inputFile, File outputFile) throws IOException {
-
+    public WizardConfiguration parseWizard() {
         // Dependencies
         ParsingHelper helper = new ParsingHelper();
         ObjectFactory factory = new MyObjectFactory();
         ControlParser controlParser = new ControlParser(factory, helper);
-        MetadataStore metadataStore = new MetadataStore();
 
         // Get our lexer
-        SpellLexer lexer = new SpellLexer(new ANTLRInputStream(new FileInputStream(inputFile)));
+        SpellLexer lexer = null;
+        try {
+            lexer = new SpellLexer(new ANTLRInputStream(this.inputStream));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error reading input file.");
+            return null;
+        }
 
         // Get a list of matched tokens
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -65,34 +82,126 @@ public class Main {
 
         // Marshall the wizard:
         WizardConfiguration wizard = (WizardConfiguration) listener.getWizard();
+        return wizard;
+    }
 
+    public void postProcess(WizardConfiguration wizard) {
         // Postprocess the wizard:
         PostProcessor postProcessor = new PostProcessor();
         postProcessor.assignStepIDs(wizard);
-        postProcessor.assignMetadataIDs(wizard, metadataStore);
-
-        wizard.marshall(outputFile, true);
+        if (this.metadataStore != null) {
+            postProcessor.assignMetadataIDs(wizard, this.metadataStore);
+        }
     }
 
-    public static void printUsage() {
-        System.out.println("Usage:");
-        System.out.println("$ ./run.sh <inputFile.spl> <outputFile.xml>");
+    public void writeWizard(WizardConfiguration wizard) {
+        String comments = null;
+        if (this.prettyPrint) {
+            SimpleDateFormat df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
+            String date = df.format(new Date());
+            String username = System.getProperty("user.name");
+            String user = username == null || username.length() <= 0 ? "" : "by " + username + " ";
+            comments = "\n  WIZARD CONFIGURATION XML." +
+                    "\n" +
+                    "\n  This file was auto-generated from SPELL" +
+                    "\n  " + user + "on " + date + "." +
+                    "\n" +
+                    "\n  Changes to this file may be overwritten.\n";
+        }
+        wizard.marshall(this.outputStream, this.prettyPrint, comments);
+        try {
+            this.outputStream.close();
+        } catch (IOException e) {
+            System.err.println("Error closing output file");
+        }
+    }
+
+    public void run() {
+        WizardConfiguration wizard = parseWizard();
+        postProcess(wizard);
+        writeWizard(wizard);
+    }
+
+    public boolean parseArgs(String args[]) {
+        File inputFile = null;
+        File outputFile = null;
+
+        this.prettyPrint = false;
+        File documentTypeFile;
+        List<String> unknownArgs = new ArrayList<>();
+
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+
+            if (arg.equals("-h") || arg.equals("-help")) {
+                // -h or -help will show usage
+                return false;
+            } else if (arg.equals("-pretty-print")) {
+                this.prettyPrint = true;
+            } else if (arg.equals("-o") || arg.equals("-output")) {
+                i++;
+                if (i < args.length) {
+                    outputFile = new File(args[i]);
+                } else {
+                    System.err.println("Expected ouput file after option '" + arg + "'");
+                    return false;
+                }
+            } else if (arg.equals("-document-type")) {
+                i++;
+                if (i < args.length) {
+                    documentTypeFile = new File(args[i]);
+                } else {
+                    System.err.println("Expected document type file XML after option '" + arg + "'");
+                    return false;
+                }
+            } else if (inputFile == null) {
+                inputFile = new File(arg);
+            } else {
+                unknownArgs.add(arg);
+            }
+            if (unknownArgs.size() > 0) {
+                for (String s : unknownArgs) {
+                    System.err.println("Uknown argument '" + s + "'");
+                    return false;
+                }
+            }
+        }
+
+        // Make sure that, at least, the input file is given
+        if (inputFile == null) {
+            System.err.println("Input file not specified.");
+            return false;
+        } else {
+            try {
+                this.inputStream = new FileInputStream(inputFile);
+            } catch (FileNotFoundException e) {
+                System.err.println("Cannot read input file " + inputFile + ". File does not exist.");
+                return false;
+            }
+        }
+        if (outputFile != null) {
+            try {
+                this.outputStream = new FileOutputStream(outputFile);
+            } catch (FileNotFoundException e) {
+                System.err.println("Cannot write to output file " + outputFile);
+                return false;
+            }
+        } else {
+            // If output not specified, print to stdout
+            this.outputStream = System.out;
+        }
+
+        return true;
     }
 
     public static void main(String args[]) {
-        //generateSampleXML(args);
-        // printWizard("step 'first step':\r\n" +
-        //         "step \"second step\":\n");
-        if (args.length != 2) {
-            System.err.println("Wrong number of arguments");
-            System.err.println("" + args.length + " provided, 2 needed");
-            printUsage();
+
+        Main program = new Main();
+
+        if (!program.parseArgs(args)) {
+            program.printUsage();
         } else {
-            try {
-                parseFile(new File(args[0]), new File(args[1]));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            program.run();
         }
     }
 }
