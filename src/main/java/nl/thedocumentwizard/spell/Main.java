@@ -1,5 +1,7 @@
 package nl.thedocumentwizard.spell;
 
+import com.streamserve.schemas.documenttype._1.DocumentTypeType;
+import nl.thedocumentwizard.helper.DocumentTypes;
 import nl.thedocumentwizard.spell.parser.*;
 import nl.thedocumentwizard.wizardconfiguration.MyObjectFactory;
 import nl.thedocumentwizard.wizardconfiguration.WizardConfiguration;
@@ -30,10 +32,15 @@ import java.util.List;
  */
 public class Main {
 
+    // Arguments
+    boolean prettyPrint;
+    File documentTypeFile;
+    String documentTypeName;
+    // Others
     InputStream inputStream;
     OutputStream outputStream;
     MetadataStore metadataStore;
-    boolean prettyPrint;
+    DocumentTypeType documentType;
 
     public void printUsage() {
         System.out.println(
@@ -44,8 +51,10 @@ public class Main {
                 "    -o[utput] <output file>\n" +
                 "                   Output the document type to a file\n" +
                 "    -pretty-print  Beautify the output XML\n" +
-                "    -document-type <documentType.xml>\n" +
-                "                   Uses the document type xml.\n"
+                "    -document-types-xml <documentType.xml>\n" +
+                "                   Uses the document type xml.\n" +
+                "    -document-type <documentTypeName>\n" +
+                "                   The name of the document type to use.\n"
                 ////////////////////////////////////////////////////////////////////////////
         );
     }
@@ -87,10 +96,15 @@ public class Main {
 
     public void postProcess(WizardConfiguration wizard) {
         // Postprocess the wizard:
-        PostProcessor postProcessor = new PostProcessor();
+        PostProcessor postProcessor = new PostProcessor(this.metadataStore);
         postProcessor.assignStepIDs(wizard);
         if (this.metadataStore != null) {
-            postProcessor.assignMetadataIDs(wizard, this.metadataStore);
+            postProcessor.assignMetadataIDs(wizard);
+        }
+        // Set document type (if specified)
+        if (this.documentType != null) {
+            wizard.setDocumentTypeName(this.documentType.getName());
+            wizard.setDocumentTypeID(this.documentType.getGuid());
         }
     }
 
@@ -127,7 +141,6 @@ public class Main {
         File outputFile = null;
 
         this.prettyPrint = false;
-        File documentTypeFile;
         List<String> unknownArgs = new ArrayList<>();
 
         for (int i = 0; i < args.length; i++) {
@@ -147,6 +160,14 @@ public class Main {
                     return false;
                 }
             } else if (arg.equals("-document-type")) {
+                i++;
+                if (i < args.length) {
+                    documentTypeName = args[i];
+                } else {
+                    System.err.println("Expected document type name after option '" + arg + "'");
+                    return false;
+                }
+            } else if (arg.equals("-document-types-xml")) {
                 i++;
                 if (i < args.length) {
                     documentTypeFile = new File(args[i]);
@@ -191,6 +212,42 @@ public class Main {
             this.outputStream = System.out;
         }
 
+        // Check that the documentType exists:
+        if(!this.loadDocumentType()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean loadDocumentType() {
+        if (this.documentTypeFile != null) {
+            try {
+                DocumentTypes documentTypes = DocumentTypes.unmarshall(new FileInputStream (this.documentTypeFile));
+                if (this.documentTypeName != null) {
+                    this.documentType = documentTypes.getDocumentTypeByName(this.documentTypeName);
+                    if (this.documentType == null) {
+                        System.err.println("Document type '" + this.documentTypeName + "' not found in xml " + this.documentTypeFile + ".");
+                        return false;
+                    }
+                } else {
+                    if (documentTypes.getDocumentTypes() != null && documentTypes.getDocumentTypes().getDocumentType().size() >= 1) {
+                        this.documentType = documentTypes.getDocumentTypes().getDocumentType().get(0);
+                        if (documentTypes.getDocumentTypes().getDocumentType().size() > 1) {
+                            System.err.println("Document type name not specified. Using " + this.documentType.getName() + " by default.");
+                        }
+                    }
+                }
+                this.metadataStore = new MetadataStore();
+                this.metadataStore.loadDocumentType(documentType);
+            } catch (FileNotFoundException e) {
+                System.err.println("Error reading document types file");
+                return true;
+            }
+        } else if (this.documentTypeName != null) {
+            System.err.println("Document type name specified but no documenttypes.xml");
+            return false;
+        }
         return true;
     }
 

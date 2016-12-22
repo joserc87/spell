@@ -2,18 +2,18 @@
 
 step "step number 1" as first_step:
     "Simple question"
-    required string "mandatory string question" = "default value" -> $metadataName
-    number "optional number question" = $metadataName
+    required string "mandatory string question" = "default value" -> $String1
+    number "optional number question" = $Number1
     when TRIGGER:
         goto step1
         goto step2
-        $metadata1 = "value"
+        $String2 = "value"
 
 step "step number 2", "my group": # Inline comment
     label "" = "a label"
     required list "a list":
-        $m1
-        $m2 = $m3
+        $Number2
+        $String4 = $Number3
         "displayText" = "value"
 
 step "containers":
@@ -23,8 +23,8 @@ step "containers":
             label = 'second'
             string
         list:
-            $m1
-            'item2' = $m2
+            $Number2
+            'item2' = $Number3
 
 step "final step":
     image "image upload control"

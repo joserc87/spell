@@ -19,11 +19,13 @@ import static org.mockito.Mockito.when;
  */
 public class PostProcessorTest {
 
+    MetadataStore metadataStore;
     PostProcessor postProcessor;
 
     @Before
     public void becauseThereIsAPostProcessor() {
-        postProcessor = new PostProcessor();
+        metadataStore = mock(MetadataStore.class);
+        postProcessor = new PostProcessor(metadataStore);
     }
 
     @Test
@@ -102,8 +104,6 @@ public class PostProcessorTest {
         eq.getControlOrConstOrMetadata().add(metadata);
         metadata.setName("metadata6");
 
-        MetadataStore metadataStore = mock(MetadataStore.class);
-
         when(metadataStore.findMetadataIDByName("metadata1")).thenReturn("11111");
         when(metadataStore.findMetadataIDByName("metadata2")).thenReturn("22222");
         when(metadataStore.findMetadataIDByName("metadata3")).thenReturn("33333");
@@ -111,7 +111,7 @@ public class PostProcessorTest {
         when(metadataStore.findMetadataIDByName("metadata5")).thenReturn("55555");
         when(metadataStore.findMetadataIDByName("metadata6")).thenReturn("66666");
 
-        postProcessor.assignMetadataIDs(wizard, metadataStore);
+        postProcessor.assignMetadataIDs(wizard);
 
         Assert.assertEquals("11111",
                 wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(0).getString().getMetadataID());

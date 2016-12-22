@@ -1,5 +1,6 @@
 package nl.thedocumentwizard.helper;
 
+import com.streamserve.schemas.documenttype._1.DocumentTypeType;
 import com.streamserve.schemas.documenttype._1.Strs;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -53,5 +54,16 @@ public class DocumentTypes extends Strs{
             e.printStackTrace();
         }
         return root;
+    }
+
+    public DocumentTypeType getDocumentTypeByName(String tcfDemo) {
+        if (documentTypes != null) {
+            for (DocumentTypeType docType : documentTypes.getDocumentType()) {
+                if (docType.getName().equals(tcfDemo)) {
+                    return docType;
+                }
+            }
+        }
+        return null;
     }
 }
