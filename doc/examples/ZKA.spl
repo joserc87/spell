@@ -1,0 +1,66 @@
+# Spell script for Wizard.xml
+
+step "Algemeen", "Buitenland":
+	# Set initial values for metadatas:
+	$BTL_STR_002_1_20 = "«naam land»"
+	$BTL_STR_002_1_21 = "«naam geneesmiddel»"
+	$BTL_STR_002_1_22 = "«vul in artikelnummer»"
+	# Controls
+	"Referentienummer:" -> $org_RefNr
+	required "Onderwerp:" -> $briefonderwerp
+	label = "Ondertekenaar"
+	required radio = medisch_adviseur:
+		label = "medisch adviseur" -> $ondertekenaar_functie as medisch_adviseur
+		multi as other:
+			string = $unknownMetadata -> $ondertekenaar_naam
+			list = "medewerker Declaratieservice" -> $ondertekenaar_functie:
+				"medewerker Declaratieservice"
+				"klachtcoördinator"
+				"klachtbehandelaar"
+	list "Indien gewenst, verander optioneel de Medische Categorie van deze brief." = $medischecategorie_default -> $medischecategorie_default:
+		$medischecategorie1
+		$medischecategorie2
+		$medischecategorie3
+		$medischecategorie4
+		$medischecategorie5
+		$medischecategorie6
+		$medischecategorie7
+		$medischecategorie8
+		$medischecategorie9
+		$medischecategorie10
+		$medischecategorie11
+		$medischecategorie12
+		$medischecategorie13
+		$medischecategorie14
+		$medischecategorie15
+		$medischecategorie16
+		$medischecategorie17
+		$medischecategorie18
+		$medischecategorie19
+		$medischecategorie20
+
+step "AFW VC Apotheeknota niet GVS (RES)", "BUITENLAND":
+	"naam land" -> $txt_001
+	"naam genesmiddel" -> $txt_002
+	"vul in artikelnummer" -> $txt_003
+	checkbox "Bijlage(n) uploaden?" = unselected as bijlagen_uploaden
+	# Condition: Skip bijlage step
+	#when bijlagen_uploaden is not selected:
+	when TRIGGER:
+		goto einde
+
+step "BIJLAGE", "Buitenland":
+	label = "Bijlage 1 t/m 5 omschrijving, bestand (PDF)"
+	string -> $bijlage_oms_01
+	attachment -> $bijlage_code_01
+	string -> $bijlage_oms_02
+	attachment -> $bijlage_code_02
+	string -> $bijlage_oms_03
+	attachment -> $bijlage_code_03
+	string -> $bijlage_oms_04
+	attachment -> $bijlage_code_04
+	string -> $bijlage_oms_05
+	attachment -> $bijlage_code_05
+
+step "EINDE", "Buitenland" as einde:
+	label "Het document is klaar"

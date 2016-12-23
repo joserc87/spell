@@ -31,6 +31,17 @@ public class MySpellListener extends SpellBaseListener {
         }
     }
 
+    public ArrayOfWizardAdvancedRule.AdvancedRule createAlwaysTrueAdvancedRule() {
+        ArrayOfWizardAdvancedRule.AdvancedRule ar = new ArrayOfWizardAdvancedRule.AdvancedRule();
+
+        ar.setEqual(new EqualComparisonTrigger());
+        ConstTriggerValue val = new ConstTriggerValue();
+        val.setVal("1");
+        // If 1 == 1:
+        ar.getEqual().getControlOrConstOrMetadata().add(val);
+        ar.getEqual().getControlOrConstOrMetadata().add(val);
+        return ar;
+    }
 
     /**
      * Converts a StepContext into a WizardStep
@@ -55,6 +66,34 @@ public class MySpellListener extends SpellBaseListener {
         // Conditions and Advanced rules
         for (SpellParser.WhenContext whenContext : ctx.when()) {
             parseWhen(whenContext, step, null);
+        }
+        // Next step:
+        if (ctx.jump() != null && ctx.jump().size() > 0) {
+            String nextStepName = ctx.jump().get(ctx.jump().size() - 1).NAME().getText();
+            // step.setNextStepName(nextStepName);
+        }
+        // Advanced rules:
+        if (ctx.metadata_assignment() != null && ctx.metadata_assignment().size() > 0) {
+            // If the step doesn't have advanced rules, create an empty list
+            if (step.getAdvancedRules() == null) {
+                step.setAdvancedRules(new ArrayOfWizardAdvancedRule());
+            }
+
+            // Advanced rule trigger: always true
+            ArrayOfWizardAdvancedRule.AdvancedRule ar = createAlwaysTrueAdvancedRule();
+
+            // Advanced rule metadatas:
+            ar.setMetadatas(new ArrayOfImplicitWizardMetadata());
+            for (SpellParser.Metadata_assignmentContext maCtx : ctx.metadata_assignment()) {
+                ImplicitWizardMetadata iwm = new ImplicitWizardMetadata();
+                ar.getMetadatas().getMetadata().add(iwm);
+                iwm.setName(this.helper.getMetadataName(maCtx.METADATA()));
+                iwm.setValue(this.helper.getString(maCtx.STRING()));
+            }
+
+            // Add advanced rule to the list
+            step.getAdvancedRules().getAdvancedRule().add(ar);
+
         }
         return step;
     }

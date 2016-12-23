@@ -117,8 +117,8 @@ step
     INDENT
       ( question
       | when
-      // Uncomment this to write advanced rules that will trigger always
-      // | metadata_assignment
+      | metadata_assignment NEWLINE
+      | jump NEWLINE
       )*
     DEDENT
   ;
