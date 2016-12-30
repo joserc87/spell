@@ -3,11 +3,15 @@
 step "step number 1" as first_step:
     "Simple question"
     required string "mandatory string question" = "default value" -> $String1
-    number "optional number question" = $Number1
-    when TRIGGER:
+    number "optional number question" = $Number1 as num
+    checkbox "checkbox" as chk
+    when $String1 == "value" or num > 1:
         goto step1
         goto step2
         $String2 = "value"
+        when chk is selected:
+            $String2 = "value2"
+            goto step3
 
 step "step number 2", "my group": # Inline comment
     label "" = "a label"

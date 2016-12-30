@@ -45,8 +45,7 @@ step "AFW VC Apotheeknota niet GVS (RES)", "BUITENLAND":
 	"vul in artikelnummer" -> $txt_003
 	checkbox "Bijlage(n) uploaden?" = unselected as bijlagen_uploaden
 	# Condition: Skip bijlage step
-	#when bijlagen_uploaden is not selected:
-	when TRIGGER:
+	when bijlagen_uploaden is not selected:
 		goto einde
 
 step "BIJLAGE", "Buitenland":

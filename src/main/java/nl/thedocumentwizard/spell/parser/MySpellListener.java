@@ -1,20 +1,19 @@
 
 package nl.thedocumentwizard.spell.parser;
 
-import nl.thedocumentwizard.spell.parser.SpellBaseListener;
-import nl.thedocumentwizard.spell.parser.SpellParser;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class MySpellListener extends SpellBaseListener {
 
     private ObjectFactory objectFactory;
     private ControlParser controlParser;
+    private WhenParser whenParser;
     private ParsingHelper helper;
     private Wizard wizard;
-    public MySpellListener(ObjectFactory factory, ControlParser controlParser, ParsingHelper helper) {
+    public MySpellListener(ObjectFactory factory, ControlParser controlParser, WhenParser whenParser, ParsingHelper helper) {
         this.objectFactory = factory;
         this.controlParser = controlParser;
+        this.whenParser = whenParser;
         this.helper = helper;
     }
 
@@ -106,7 +105,88 @@ public class MySpellListener extends SpellBaseListener {
      * @param parentTrigger The trigger of the parent "when". The new trigger will be AND {parentTrigger, newTrigger}
      */
     protected void parseWhen(SpellParser.WhenContext ctx, Steptype step, Trigger parentTrigger) {
+        Trigger t;
+        Trigger subCondition = whenParser.parseTrigger(ctx.test());
+        // Trigger
+        if (parentTrigger != null) {
+            AndTrigger and = new AndTrigger();
+            and.getOrOrLessThanOrRegEx().add(parentTrigger);
+            and.getOrOrLessThanOrRegEx().add(subCondition);
+            t = and;
+        } else {
+            t = subCondition;
+        }
+        // Create Advanced rules and conditions
+        if (ctx.when_instruction() != null) {
+            ArrayOfWizardAdvancedRule.AdvancedRule ar = null;
+            ArrayOfWizardCondition.Condition condition = null;
+            for (SpellParser.When_instructionContext instruction : ctx.when_instruction()) {
+                // Advanced rule:
+                if (instruction.metadata_assignment() != null) {
+                    // If it' the first metadata assignment, create advanced rule. Otherwise, just add the metadata
+                    if (ar == null) {
+                        ar = new ArrayOfWizardAdvancedRule.AdvancedRule();
+                        if (step.getAdvancedRules() == null) {
+                            step.setAdvancedRules(new ArrayOfWizardAdvancedRule());
+                        }
+                        step.getAdvancedRules().getAdvancedRule().add(ar);
+                        this.setAdvancedRuleTrigger(ar, t);
+                        ar.setMetadatas(new ArrayOfImplicitWizardMetadata());
+                    }
+                    // Advanced rule metadatas:
+                    ImplicitWizardMetadata iwm = new ImplicitWizardMetadata();
+                    ar.getMetadatas().getMetadata().add(iwm);
+                    iwm.setName(this.helper.getMetadataName(instruction.metadata_assignment().METADATA()));
+                    iwm.setValue(this.helper.getString(instruction.metadata_assignment().STRING()));
+                } else if (instruction.jump() != null) {
+                    // Condition
+                    if (condition == null) {
+                        condition = new ArrayOfWizardCondition.Condition();
+                        if (step.getConditions() == null) {
+                            step.setConditions(new ArrayOfWizardCondition());
+                        }
+                        step.getConditions().getCondition().add(condition);
+                        this.setConditionTrigger(condition, t);
+                    }
+                    // Goto
+                    // TODO: Get step by alias and go to that step
+                    String nextStepName = instruction.jump().NAME().getText();
+                    condition.setNextStepName(nextStepName);
+                } else if (instruction.when() != null) {
+                    parseWhen(instruction.when(), step, t);
+                }
+            }
+        }
+    }
 
+    private void setAdvancedRuleTrigger(ArrayOfWizardAdvancedRule.AdvancedRule ar, Trigger t) {
+        if (t instanceof AndTrigger) { ar.setAnd((AndTrigger) t); }
+        else if (t instanceof OrTrigger) { ar.setOr((OrTrigger) t); }
+        else if (t instanceof NotTrigger) { ar.setNot((NotTrigger) t); }
+        else if (t instanceof EmptyTrigger) { ar.setEmpty((EmptyTrigger) t); }
+        else if (t instanceof RegexTrigger) { ar.setRegEx((RegexTrigger) t); }
+        else if (t instanceof EqualComparisonTrigger) { ar.setEqual((EqualComparisonTrigger) t); }
+        else if (t instanceof DifferentComparisonTrigger) { ar.setDifferent((DifferentComparisonTrigger) t); }
+        else if (t instanceof GreaterOrEqualThanComparisonTrigger) { ar.setGreaterOrEqualThan((GreaterOrEqualThanComparisonTrigger) t); }
+        else if (t instanceof GreaterThanComparisonTrigger) { ar.setGreaterThan((GreaterThanComparisonTrigger) t); }
+        else if (t instanceof LessOrEqualThanComparisonTrigger) { ar.setLessOrEqualThan((LessOrEqualThanComparisonTrigger) t); }
+        else if (t instanceof LessThanComparisonTrigger) { ar.setLessThan((LessThanComparisonTrigger) t); }
+        else { System.err.println("Trigger error " + t); }
+    }
+
+    private void setConditionTrigger(ArrayOfWizardCondition.Condition condition, Trigger t) {
+        if (t instanceof AndTrigger) { condition.setAnd((AndTrigger) t); }
+        else if (t instanceof OrTrigger) { condition.setOr((OrTrigger) t); }
+        else if (t instanceof NotTrigger) { condition.setNot((NotTrigger) t); }
+        else if (t instanceof EmptyTrigger) { condition.setEmpty((EmptyTrigger) t); }
+        else if (t instanceof RegexTrigger) { condition.setRegEx((RegexTrigger) t); }
+        else if (t instanceof EqualComparisonTrigger) { condition.setEqual((EqualComparisonTrigger) t); }
+        else if (t instanceof DifferentComparisonTrigger) { condition.setDifferent((DifferentComparisonTrigger) t); }
+        else if (t instanceof GreaterOrEqualThanComparisonTrigger) { condition.setGreaterOrEqualThan((GreaterOrEqualThanComparisonTrigger) t); }
+        else if (t instanceof GreaterThanComparisonTrigger) { condition.setGreaterThan((GreaterThanComparisonTrigger) t); }
+        else if (t instanceof LessOrEqualThanComparisonTrigger) { condition.setLessOrEqualThan((LessOrEqualThanComparisonTrigger) t); }
+        else if (t instanceof LessThanComparisonTrigger) { condition.setLessThan((LessThanComparisonTrigger) t); }
+        else { System.err.println("Trigger error " + t); }
     }
 
     /**

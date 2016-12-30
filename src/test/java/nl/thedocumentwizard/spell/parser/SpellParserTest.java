@@ -43,17 +43,31 @@ public class SpellParserTest {
         return listener;
     }
 
-    public SpellListener parseStep(String s) throws IOException {
+    public SpellListener parseWhen(String s) throws IOException {
         SpellParser parser = getParserFromString(s);
 
         // The entry point is a question
-        SpellParser.StepContext questionSentenceContext = parser.step();
+        SpellParser.WhenContext whenSentenceContext = parser.when();
 
         // Walk it and attach our listener
         ParseTreeWalker walker = new ParseTreeWalker();
         // Mock this:
         SpellListener listener = mock(SpellListener.class);
-        walker.walk(listener, questionSentenceContext);
+        walker.walk(listener, whenSentenceContext);
+        return listener;
+    }
+
+    public SpellListener parseStep(String s) throws IOException {
+        SpellParser parser = getParserFromString(s);
+
+        // The entry point is a question
+        SpellParser.StepContext stepSentenceContext = parser.step();
+
+        // Walk it and attach our listener
+        ParseTreeWalker walker = new ParseTreeWalker();
+        // Mock this:
+        SpellListener listener = mock(SpellListener.class);
+        walker.walk(listener, stepSentenceContext);
         return listener;
     }
 
@@ -336,6 +350,39 @@ public class SpellParserTest {
         Assert.assertEquals(2, ctx.getValue().question().size());
         Assert.assertEquals("'question name'", ctx.getValue().question(0).named_string_control().STRING().getText());
         Assert.assertEquals("'another question'", ctx.getValue().question(1).named_string_control().STRING().getText());
+    }
+
+    @Test
+    public void should_parse_complex_tests() throws IOException {
+        SpellListener listener = parseWhen("when (step1.chk is selected or false) and control1 == $metadata1 == 'value' or true:\n" +
+                "  goto stepN\n");
+        ArgumentCaptor<SpellParser.WhenContext> ctx = ArgumentCaptor.forClass((SpellParser.WhenContext.class));
+        verify(listener).enterWhen(ctx.capture());
+
+        // (step1.chk is selected or false) and control1 == $metadata1 == 'value' or true
+        SpellParser.Or_testContext or = ctx.getValue().test().or_test();
+        Assert.assertEquals(2, or.and_test().size());
+        //   (step1.chk is selected or false) and control1 == $metadata1 == 'value'
+        Assert.assertEquals(2, or.and_test(0).not_test().size());
+        //     (step1.chk is selected or false)
+        SpellParser.Or_testContext or2 = or.and_test(0).not_test(0).test().or_test();
+        Assert.assertEquals(2, or2.and_test().size());
+        //       step1.chk is selected
+        Assert.assertEquals("step1", or2.and_test(0).not_test(0).comparison().term(0).control().NAME(0).getText());
+        Assert.assertEquals("chk", or2.and_test(0).not_test(0).comparison().term(0).control().NAME(1).getText());
+        Assert.assertEquals("is", or2.and_test(0).not_test(0).comparison().comp_op(0).IS().getText());
+        Assert.assertEquals("selected", or2.and_test(0).not_test(0).comparison().term(1).literal().bool().TRUE().getText());
+        //       .. or false
+        Assert.assertEquals("false", or2.and_test(1).not_test(0).comparison().term(0).literal().bool().FALSE().getText());
+        // control1 == $metadata1 == 'value'
+        SpellParser.ComparisonContext comp = or.and_test(0).not_test(1).comparison();
+        Assert.assertEquals("control1", comp.term(0).control().NAME(0).getText());
+        Assert.assertEquals("$metadata1", comp.term(1).METADATA().getText());
+        Assert.assertEquals("'value'", comp.term(2).literal().STRING().getText());
+        Assert.assertEquals("==", comp.comp_op(0).getText());
+        Assert.assertEquals("==", comp.comp_op(1).getText());
+        // ... or true
+        Assert.assertEquals("true", or.and_test(1).not_test(0).comparison().term(0).literal().bool().TRUE().getText());
     }
 
 }

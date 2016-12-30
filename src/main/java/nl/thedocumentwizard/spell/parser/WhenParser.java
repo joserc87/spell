@@ -1,0 +1,284 @@
+package nl.thedocumentwizard.spell.parser;
+
+import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
+
+/**
+ * Created by jose on 23/12/2016.
+ */
+public class WhenParser {
+    private ObjectFactory objectFactory;
+    private ParsingHelper helper;
+
+    public WhenParser(ObjectFactory factory, ParsingHelper helper) {
+        this.objectFactory = factory;
+        this.helper = helper;
+    }
+
+    Trigger parseTrigger(SpellParser.TestContext test) {
+        if (test != null) {
+            return this.parseOrTest(test.or_test());
+        } else {
+            return null;
+        }
+    }
+
+    private Trigger parseOrTest(SpellParser.Or_testContext ctx) {
+        if (ctx != null && ctx.and_test() != null && ctx.and_test().size() > 0) {
+            if (ctx.and_test().size() == 1) {
+                // If there is only one, it's not really an OR
+                return this.parseAndTest(ctx.and_test(0));
+            } else if (ctx.and_test().size() > 1) {
+                // If there are multiple, get all of them and return in an OR
+                OrTrigger trigger = new OrTrigger();
+                for(SpellParser.And_testContext and : ctx.and_test()) {
+                    trigger.getOrOrLessThanOrRegEx().add(this.parseAndTest(and));
+                }
+                return trigger;
+            }
+        }
+        return null;
+    }
+
+    private Trigger parseAndTest(SpellParser.And_testContext ctx) {
+        if (ctx != null && ctx.not_test() != null && ctx.not_test().size() > 0) {
+            if (ctx.not_test().size() == 1) {
+                // If there is only one, it's not really an OR
+                return this.parseNotTest(ctx.not_test(0));
+            } else if (ctx.not_test().size() > 1) {
+                // If there are multiple, get all of them and return in an AND
+                OrTrigger trigger = new OrTrigger();
+                for(SpellParser.Not_testContext not : ctx.not_test()) {
+                    trigger.getOrOrLessThanOrRegEx().add(this.parseNotTest(not));
+                }
+                return trigger;
+            }
+        }
+        return null;
+    }
+
+    private Trigger parseNotTest(SpellParser.Not_testContext ctx) {
+        if (ctx != null) {
+            // not_test
+            // : NOT not_test
+            // | '(' test ')'
+            // | comparison
+            // When not_test, negate
+            if (ctx.not_test() != null) {
+                NotTrigger trigger = new NotTrigger();
+                trigger.getOrOrLessThanOrRegEx().add(this.parseNotTest(ctx.not_test()));
+                return trigger;
+            } else if (ctx.test() != null) {
+                return parseTrigger(ctx.test());
+            } else if (ctx.comparison() != null) {
+                return parseComparison(ctx.comparison());
+            }
+        }
+        return null;
+    }
+
+    private Trigger parseComparison(SpellParser.ComparisonContext comparison) {
+        // There are 3 cases:
+        // 1. There is only one term.
+        //   1.1 If it's a literal, it has to be a boolean. Otherwise, return error.
+        //   1.2 If it's a metadata, compare with "True"
+        //   1.3 If it's a control, it has to be a checkbox. Otherwise, return error.
+        // 2. There are 2 terms. Just return a simple comparison.
+        // 3. There are multiple terms. Then there is an implicit AND (a == b < c -> a == b AND b < c)
+        if (comparison != null && comparison.term() != null && comparison.term().size() > 0) {
+            if (comparison.term().size() == 1) {
+                SpellParser.TermContext term = comparison.term().get(0);
+                if (term.literal() != null) {
+                    if (term.literal().bool() != null) {
+                        return this.parseBooleanLiteral(term.literal().bool());
+                    } else if (term.literal().NUM() != null){
+                        this.logError("Expected boolean expression but found numeric value '" + term.literal().NUM().getText() + "'");
+                    } else if (term.literal().STRING() != null){
+                        this.logError("Expected boolean expression but found string value " + term.literal().STRING().getText());
+                    }
+                } else if (term.METADATA() != null) {
+                    // Return metadata == "True"
+                    MetadataTriggerValue metadata = new MetadataTriggerValue();
+                    metadata.setName(this.helper.getMetadataName(term.METADATA()));
+                    ConstTriggerValue constVal = new ConstTriggerValue();
+                    constVal.setVal("True");
+
+                    EqualComparisonTrigger equal = new EqualComparisonTrigger();
+                    equal.getControlOrConstOrMetadata().add(metadata);
+                    equal.getControlOrConstOrMetadata().add(constVal);
+                    return equal;
+                } else if (term.control() != null) {
+                    // TODO:
+                    // - Get the control
+                    // - Check that the control is a checkbox.
+                    // - Return checkbox == "True". Otherwise, error
+                    ControlTriggerValue control = new ControlTriggerValue();
+                    if (term.control().NAME().size() > 1) {
+                        control.setStep(-1);
+                    }
+                    control.setId(term.control().NAME(term.control().NAME().size() > 1 ? 1 : 0).getText());
+
+                    ConstTriggerValue constVal = new ConstTriggerValue();
+                    constVal.setVal("True");
+
+                    EqualComparisonTrigger equal = new EqualComparisonTrigger();
+                    equal.getControlOrConstOrMetadata().add(control);
+                    equal.getControlOrConstOrMetadata().add(constVal);
+                    return equal;
+                }
+            } if (comparison.term().size() == 2) {
+                return this.getComparison(comparison.term(0), comparison.term(1), comparison.comp_op(0));
+            } else { // > 2
+                AndTrigger and = new AndTrigger();
+                for (int i = 0; i < comparison.term().size() - 1; i++) {
+                    and.getOrOrLessThanOrRegEx().add(this.getComparison(
+                            comparison.term(i),
+                            comparison.term(i + 1),
+                            comparison.comp_op(i)
+                    ));
+                }
+                return and;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private Trigger getComparison(SpellParser.TermContext term1, SpellParser.TermContext term2, SpellParser.Comp_opContext op) {
+        // comp_op
+        // : '<'
+        // | '>'
+        // | '=='
+        // | '>='
+        // | '<='
+        // | '<>'
+        // | '!='
+        // | IN
+        // | NOT IN
+        // | IS
+        // | IS NOT
+        // ;
+
+        TriggerValue v1 = this.parseTermContext(term1);
+        TriggerValue v2 = this.parseTermContext(term2);
+
+        if (op.getText().equals("<")) {
+            LessThanComparisonTrigger trigger = new LessThanComparisonTrigger();
+            trigger.getControlOrConstOrMetadata().add(v1);
+            trigger.getControlOrConstOrMetadata().add(v2);
+            return trigger;
+        } else if (op.getText().equals(">")) {
+            GreaterThanComparisonTrigger trigger = new GreaterThanComparisonTrigger();
+            trigger.getControlOrConstOrMetadata().add(v1);
+            trigger.getControlOrConstOrMetadata().add(v2);
+            return trigger;
+        } else if (op.getText().equals("==")) {
+            EqualComparisonTrigger trigger = new EqualComparisonTrigger();
+            trigger.getControlOrConstOrMetadata().add(v1);
+            trigger.getControlOrConstOrMetadata().add(v2);
+            return trigger;
+        } else if (op.getText().equals(">=")) {
+            GreaterOrEqualThanComparisonTrigger trigger = new GreaterOrEqualThanComparisonTrigger();
+            trigger.getControlOrConstOrMetadata().add(v1);
+            trigger.getControlOrConstOrMetadata().add(v2);
+            return trigger;
+        } else if (op.getText().equals("<=")) {
+            LessOrEqualThanComparisonTrigger trigger = new LessOrEqualThanComparisonTrigger();
+            trigger.getControlOrConstOrMetadata().add(v1);
+            trigger.getControlOrConstOrMetadata().add(v2);
+            return trigger;
+        } else if (op.getText().equals("<>")) {
+            DifferentComparisonTrigger trigger = new DifferentComparisonTrigger();
+            trigger.getControlOrConstOrMetadata().add(v1);
+            trigger.getControlOrConstOrMetadata().add(v2);
+            return trigger;
+        } else if (op.getText().equals("!=")) {
+            DifferentComparisonTrigger trigger = new DifferentComparisonTrigger();
+            trigger.getControlOrConstOrMetadata().add(v1);
+            trigger.getControlOrConstOrMetadata().add(v2);
+            return trigger;
+        } else if (op.IS() != null) {
+            if (op.NOT() == null) {
+                // IS
+                EqualComparisonTrigger trigger = new EqualComparisonTrigger();
+                trigger.getControlOrConstOrMetadata().add(v1);
+                trigger.getControlOrConstOrMetadata().add(v2);
+                return trigger;
+            } else {
+                // IS NOT
+                DifferentComparisonTrigger trigger = new DifferentComparisonTrigger();
+                trigger.getControlOrConstOrMetadata().add(v1);
+                trigger.getControlOrConstOrMetadata().add(v2);
+                return trigger;
+            }
+        }
+        return null;
+    }
+
+    private TriggerValue parseTermContext(SpellParser.TermContext term) {
+        if (term.literal() != null) {
+            if (term.literal().bool() != null) {
+                if (term.literal().bool().TRUE() != null) {
+                    ConstTriggerValue val = new ConstTriggerValue();
+                    val.setVal("True");
+                    return val;
+                } else if (term.literal().bool().TRUE() != null) {
+                    ConstTriggerValue val = new ConstTriggerValue();
+                    val.setVal("False");
+                    return val;
+                }
+            } else if (term.literal().NUM() != null) {
+                ConstTriggerValue val = new ConstTriggerValue();
+                val.setVal(term.literal().NUM().getText());
+                return val;
+            } else if (term.literal().STRING() != null) {
+                ConstTriggerValue val = new ConstTriggerValue();
+                val.setVal(this.helper.getString(term.literal().STRING().getText()));
+                return val;
+            }
+        } else if (term.METADATA() != null) {
+            MetadataTriggerValue metadata = new MetadataTriggerValue();
+            metadata.setName(this.helper.getMetadataName(term.METADATA().getText()));
+            return metadata;
+        } else if (term.control() != null) {
+            ControlTriggerValue control = new ControlTriggerValue();
+            // TODO: Get the control by the alias
+            control.setId(term.control().NAME(term.control().NAME().size() > 1 ? 1 : 0).getText());
+            return control;
+        }
+        return null;
+    }
+
+    private Trigger parseBooleanLiteral(SpellParser.BoolContext bool) {
+        if (bool.TRUE() != null) {
+            if (bool.TRUE().getText().equals("true")) {
+                return this.getBooleanTrigger(true);
+            } else {
+                this.logError("Value '" + bool.TRUE().getText() + "' not allowed here");
+                return null;
+            }
+        } else if (bool.FALSE() != null) {
+            if (bool.FALSE().getText().equals("false")) {
+                return this.getBooleanTrigger(false);
+            } else {
+                this.logError("Value '" + bool.FALSE().getText() + "' not allowed here");
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private Trigger getBooleanTrigger(boolean b) {
+        ConstTriggerValue val1 = new ConstTriggerValue();
+        val1.setVal("a");
+        ConstTriggerValue val2 = new ConstTriggerValue();
+        val2.setVal(b ? "a" : "b");
+        EqualComparisonTrigger eq = new EqualComparisonTrigger();
+        eq.getControlOrConstOrMetadata().add(val1);
+        eq.getControlOrConstOrMetadata().add(val2);
+        return eq;
+    }
+
+    private void logError(String s) {
+        System.err.println(s);
+    }
+}

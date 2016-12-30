@@ -64,6 +64,7 @@ public class Main {
         ParsingHelper helper = new ParsingHelper();
         ObjectFactory factory = new MyObjectFactory();
         ControlParser controlParser = new ControlParser(factory, helper);
+        WhenParser whenParser = new WhenParser(factory, helper);
 
         // Get our lexer
         SpellLexer lexer = null;
@@ -86,7 +87,7 @@ public class Main {
 
         // Walk it and attach our listener
         ParseTreeWalker walker = new ParseTreeWalker();
-        MySpellListener listener = new MySpellListener(factory, controlParser, helper);
+        MySpellListener listener = new MySpellListener(factory, controlParser, whenParser, helper);
         walker.walk(listener, wizardSentenceContext);
 
         // Marshall the wizard:

@@ -233,11 +233,16 @@ container_control_type
   ;
 
 when
-  : WHEN 'TRIGGER' COLON NEWLINE INDENT
-    ( metadata_assignment NEWLINE
-    | jump NEWLINE
-    )*
+  : WHEN test COLON NEWLINE
+    INDENT
+    ( when_instruction )*
     DEDENT
+  ;
+
+when_instruction
+  : metadata_assignment NEWLINE
+  | jump NEWLINE
+  | when
   ;
 
 metadata_assignment
@@ -251,6 +256,60 @@ jump
 literal
   : STRING | NUM | bool
   ;
+
+test
+ : or_test
+ ;
+
+/// or_test: and_test ('or' and_test)*
+or_test
+ : and_test ( OR and_test )*
+ ;
+
+/// and_test: not_test ('and' not_test)*
+and_test
+ : not_test ( AND not_test )*
+ ;
+
+/// not_test: 'not' not_test | comparison
+not_test
+ : NOT not_test
+ | '(' test ')'
+ | comparison
+ ;
+
+/// comparison: star_expr (comp_op star_expr)*
+comparison
+  : term ( comp_op term )*
+  ;
+
+term
+  : METADATA
+  | literal
+  | control
+  ;
+
+/// control: STEP.CONTROL or CONTROL
+control
+  : (NAME DOT)? NAME
+  ;
+
+/// # <> isn't actually a valid comparison operator in Python. It's here for the
+/// # sake of a __future__ import described in PEP 401
+/// comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not'
+comp_op
+ : '<'
+ | '>'
+ | '=='
+ | '>='
+ | '<='
+ | '<>'
+ | '!='
+ | IN
+ | NOT IN
+ | IS
+ | IS NOT
+ ;
 
 //////////////////
 // LEXER RULES: //
@@ -271,6 +330,14 @@ bool
 // Types
 TRUE            : 'yes' | 'true' | 'selected';
 FALSE           : 'no' | 'false' | 'unselected';
+
+AND             : 'and';
+OR              : 'or';
+DOT             : '.';
+IS              : 'is';
+NOT             : 'not';
+// Could  be useful in the future: when control in ['val1', 'val2']:
+IN              : 'in';
 
 STEP            : 'step';
 AS              : 'as';
