@@ -31,10 +31,10 @@ public class MySpellListener extends SpellBaseListener {
     }
 
     public ArrayOfWizardAdvancedRule.AdvancedRule createAlwaysTrueAdvancedRule() {
-        ArrayOfWizardAdvancedRule.AdvancedRule ar = new ArrayOfWizardAdvancedRule.AdvancedRule();
+        ArrayOfWizardAdvancedRule.AdvancedRule ar = objectFactory.createArrayOfWizardAdvancedRuleAdvancedRule();
 
-        ar.setEqual(new EqualComparisonTrigger());
-        ConstTriggerValue val = new ConstTriggerValue();
+        ar.setEqual(objectFactory.createEqualComparisonTrigger());
+        ConstTriggerValue val = objectFactory.createConstTriggerValue();
         val.setVal("1");
         // If 1 == 1:
         ar.getEqual().getControlOrConstOrMetadata().add(val);
@@ -58,7 +58,7 @@ public class MySpellListener extends SpellBaseListener {
         // Questions:
         for (SpellParser.QuestionContext questionContext : ctx.question()) {
             if (step.getQuestions() == null) {
-                step.setQuestions(new ArrayOfWizardQuestion());
+                step.setQuestions(objectFactory.createArrayOfWizardQuestion());
             }
             step.getQuestions().getQuestion().add(getQuestion(questionContext));
         }
@@ -75,16 +75,16 @@ public class MySpellListener extends SpellBaseListener {
         if (ctx.metadata_assignment() != null && ctx.metadata_assignment().size() > 0) {
             // If the step doesn't have advanced rules, create an empty list
             if (step.getAdvancedRules() == null) {
-                step.setAdvancedRules(new ArrayOfWizardAdvancedRule());
+                step.setAdvancedRules(objectFactory.createArrayOfWizardAdvancedRule());
             }
 
             // Advanced rule trigger: always true
             ArrayOfWizardAdvancedRule.AdvancedRule ar = createAlwaysTrueAdvancedRule();
 
             // Advanced rule metadatas:
-            ar.setMetadatas(new ArrayOfImplicitWizardMetadata());
+            ar.setMetadatas(objectFactory.createArrayOfImplicitWizardMetadata());
             for (SpellParser.Metadata_assignmentContext maCtx : ctx.metadata_assignment()) {
-                ImplicitWizardMetadata iwm = new ImplicitWizardMetadata();
+                ImplicitWizardMetadata iwm = objectFactory.createImplicitWizardMetadata();
                 ar.getMetadatas().getMetadata().add(iwm);
                 iwm.setName(this.helper.getMetadataName(maCtx.METADATA()));
                 iwm.setValue(this.helper.getString(maCtx.STRING()));
@@ -109,7 +109,7 @@ public class MySpellListener extends SpellBaseListener {
         Trigger subCondition = whenParser.parseTrigger(ctx.test());
         // Trigger
         if (parentTrigger != null) {
-            AndTrigger and = new AndTrigger();
+            AndTrigger and = objectFactory.createAndTrigger();
             and.getOrOrLessThanOrRegEx().add(parentTrigger);
             and.getOrOrLessThanOrRegEx().add(subCondition);
             t = and;
@@ -125,25 +125,25 @@ public class MySpellListener extends SpellBaseListener {
                 if (instruction.metadata_assignment() != null) {
                     // If it' the first metadata assignment, create advanced rule. Otherwise, just add the metadata
                     if (ar == null) {
-                        ar = new ArrayOfWizardAdvancedRule.AdvancedRule();
+                        ar = objectFactory.createArrayOfWizardAdvancedRuleAdvancedRule();
                         if (step.getAdvancedRules() == null) {
-                            step.setAdvancedRules(new ArrayOfWizardAdvancedRule());
+                            step.setAdvancedRules(objectFactory.createArrayOfWizardAdvancedRule());
                         }
                         step.getAdvancedRules().getAdvancedRule().add(ar);
                         this.setAdvancedRuleTrigger(ar, t);
-                        ar.setMetadatas(new ArrayOfImplicitWizardMetadata());
+                        ar.setMetadatas(objectFactory.createArrayOfImplicitWizardMetadata());
                     }
                     // Advanced rule metadatas:
-                    ImplicitWizardMetadata iwm = new ImplicitWizardMetadata();
+                    ImplicitWizardMetadata iwm = objectFactory.createImplicitWizardMetadata();
                     ar.getMetadatas().getMetadata().add(iwm);
                     iwm.setName(this.helper.getMetadataName(instruction.metadata_assignment().METADATA()));
                     iwm.setValue(this.helper.getString(instruction.metadata_assignment().STRING()));
                 } else if (instruction.jump() != null) {
                     // Condition
                     if (condition == null) {
-                        condition = new ArrayOfWizardCondition.Condition();
+                        condition = objectFactory.createArrayOfWizardConditionCondition();
                         if (step.getConditions() == null) {
-                            step.setConditions(new ArrayOfWizardCondition());
+                            step.setConditions(objectFactory.createArrayOfWizardCondition());
                         }
                         step.getConditions().getCondition().add(condition);
                         this.setConditionTrigger(condition, t);

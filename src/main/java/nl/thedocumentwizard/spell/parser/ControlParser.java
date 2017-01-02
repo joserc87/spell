@@ -62,7 +62,7 @@ public class ControlParser {
     }
 
     private ExplicitWizardMetadata stringOrMetadataToExplicitWizardMetadata(SpellParser.String_or_metadataContext ctx) {
-        ExplicitWizardMetadata m = new ExplicitWizardMetadata();
+        ExplicitWizardMetadata m = objectFactory.createExplicitWizardMetadata();
         if (ctx.METADATA() != null) {
             m.setMetadataName(helper.getMetadataName(ctx.METADATA()));
         } else if (ctx.STRING() != null) {
@@ -75,11 +75,11 @@ public class ControlParser {
         if (ctx.list_item() != null) {
             ArrayOfListItem items = control.getItems();
             if (items == null && ctx.list_item().size() > 0) {
-                items = new ArrayOfListItem();
+                items = objectFactory.createArrayOfListItem();
                 control.setItems(items);
             }
             for (SpellParser.List_itemContext li : ctx.list_item()) {
-                ListItem item = new ListItem();
+                ListItem item = objectFactory.createListItem();
                 if (li.string_or_metadata(1) != null) { // 2 string_or_metadata : displayText = value
                     item.setDisplayText(stringOrMetadataToExplicitWizardMetadata(li.string_or_metadata(0)));
                     item.setValue(stringOrMetadataToExplicitWizardMetadata(li.string_or_metadata(1)));
@@ -95,11 +95,11 @@ public class ControlParser {
         if (ctx.list_item() != null) {
             ArrayOfListItem items = control.getItems();
             if (items == null && ctx.list_item().size() > 0) {
-                items = new ArrayOfListItem();
+                items = objectFactory.createArrayOfListItem();
                 control.setItems(items);
             }
             for (SpellParser.List_itemContext li : ctx.list_item()) {
-                ListItem item = new ListItem();
+                ListItem item = objectFactory.createListItem();
                 if (li.string_or_metadata(1) != null) { // 2 string_or_metadata : displayText = value
                     item.setDisplayText(stringOrMetadataToExplicitWizardMetadata(li.string_or_metadata(0)));
                     item.setValue(stringOrMetadataToExplicitWizardMetadata(li.string_or_metadata(1)));
@@ -115,7 +115,7 @@ public class ControlParser {
         if (ctx.sub_control() != null) {
             ArrayOfChoice1 subControls = control.getItems();
             if (subControls == null && ctx.sub_control().size() > 0) {
-                subControls = new ArrayOfChoice1();
+                subControls = objectFactory.createArrayOfChoice1();
                 control.setItems(subControls);
             }
             for (SpellParser.Sub_controlContext subControlCtx : ctx.sub_control()) {
@@ -129,7 +129,7 @@ public class ControlParser {
         if (ctx.sub_control() != null) {
             ArrayOfChoice1 subControls = control.getItems();
             if (subControls == null && ctx.sub_control().size() > 0) {
-                subControls = new ArrayOfChoice1();
+                subControls = objectFactory.createArrayOfChoice1();
                 control.setItems(subControls);
             }
             for (SpellParser.Sub_controlContext subControlCtx : ctx.sub_control()) {
@@ -143,7 +143,7 @@ public class ControlParser {
         if (ctx.sub_control() != null) {
             ArrayOfChoice2 subControls = control.getControls();
             if (subControls == null && ctx.sub_control().size() > 0) {
-                subControls = new ArrayOfChoice2();
+                subControls = objectFactory.createArrayOfChoice2();
                 control.setControls(subControls);
             }
             for (SpellParser.Sub_controlContext subControlCtx : ctx.sub_control()) {
@@ -157,7 +157,7 @@ public class ControlParser {
         if (ctx.sub_control() != null) {
             ArrayOfChoice2 subControls = control.getControls();
             if (subControls == null && ctx.sub_control().size() > 0) {
-                subControls = new ArrayOfChoice2();
+                subControls = objectFactory.createArrayOfChoice2();
                 control.setControls(subControls);
             }
             for (SpellParser.Sub_controlContext subControlCtx : ctx.sub_control()) {

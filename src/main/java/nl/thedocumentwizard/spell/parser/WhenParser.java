@@ -29,7 +29,7 @@ public class WhenParser {
                 return this.parseAndTest(ctx.and_test(0));
             } else if (ctx.and_test().size() > 1) {
                 // If there are multiple, get all of them and return in an OR
-                OrTrigger trigger = new OrTrigger();
+                OrTrigger trigger = objectFactory.createOrTrigger();
                 for(SpellParser.And_testContext and : ctx.and_test()) {
                     trigger.getOrOrLessThanOrRegEx().add(this.parseAndTest(and));
                 }
@@ -46,7 +46,7 @@ public class WhenParser {
                 return this.parseNotTest(ctx.not_test(0));
             } else if (ctx.not_test().size() > 1) {
                 // If there are multiple, get all of them and return in an AND
-                OrTrigger trigger = new OrTrigger();
+                OrTrigger trigger = objectFactory.createOrTrigger();
                 for(SpellParser.Not_testContext not : ctx.not_test()) {
                     trigger.getOrOrLessThanOrRegEx().add(this.parseNotTest(not));
                 }
@@ -64,7 +64,7 @@ public class WhenParser {
             // | comparison
             // When not_test, negate
             if (ctx.not_test() != null) {
-                NotTrigger trigger = new NotTrigger();
+                NotTrigger trigger = objectFactory.createNotTrigger();
                 trigger.getOrOrLessThanOrRegEx().add(this.parseNotTest(ctx.not_test()));
                 return trigger;
             } else if (ctx.test() != null) {
@@ -97,12 +97,12 @@ public class WhenParser {
                     }
                 } else if (term.METADATA() != null) {
                     // Return metadata == "True"
-                    MetadataTriggerValue metadata = new MetadataTriggerValue();
+                    MetadataTriggerValue metadata = objectFactory.createMetadataTriggerValue();
                     metadata.setName(this.helper.getMetadataName(term.METADATA()));
-                    ConstTriggerValue constVal = new ConstTriggerValue();
+                    ConstTriggerValue constVal = objectFactory.createConstTriggerValue();
                     constVal.setVal("True");
 
-                    EqualComparisonTrigger equal = new EqualComparisonTrigger();
+                    EqualComparisonTrigger equal = objectFactory.createEqualComparisonTrigger();
                     equal.getControlOrConstOrMetadata().add(metadata);
                     equal.getControlOrConstOrMetadata().add(constVal);
                     return equal;
@@ -111,16 +111,16 @@ public class WhenParser {
                     // - Get the control
                     // - Check that the control is a checkbox.
                     // - Return checkbox == "True". Otherwise, error
-                    ControlTriggerValue control = new ControlTriggerValue();
+                    ControlTriggerValue control = objectFactory.createControlTriggerValue();
                     if (term.control().NAME().size() > 1) {
                         control.setStep(-1);
                     }
                     control.setId(term.control().NAME(term.control().NAME().size() > 1 ? 1 : 0).getText());
 
-                    ConstTriggerValue constVal = new ConstTriggerValue();
+                    ConstTriggerValue constVal = objectFactory.createConstTriggerValue();
                     constVal.setVal("True");
 
-                    EqualComparisonTrigger equal = new EqualComparisonTrigger();
+                    EqualComparisonTrigger equal = objectFactory.createEqualComparisonTrigger();
                     equal.getControlOrConstOrMetadata().add(control);
                     equal.getControlOrConstOrMetadata().add(constVal);
                     return equal;
@@ -128,7 +128,7 @@ public class WhenParser {
             } if (comparison.term().size() == 2) {
                 return this.getComparison(comparison.term(0), comparison.term(1), comparison.comp_op(0));
             } else { // > 2
-                AndTrigger and = new AndTrigger();
+                AndTrigger and = objectFactory.createAndTrigger();
                 for (int i = 0; i < comparison.term().size() - 1; i++) {
                     and.getOrOrLessThanOrRegEx().add(this.getComparison(
                             comparison.term(i),
@@ -162,50 +162,50 @@ public class WhenParser {
         TriggerValue v2 = this.parseTermContext(term2);
 
         if (op.getText().equals("<")) {
-            LessThanComparisonTrigger trigger = new LessThanComparisonTrigger();
+            LessThanComparisonTrigger trigger = objectFactory.createLessThanComparisonTrigger();
             trigger.getControlOrConstOrMetadata().add(v1);
             trigger.getControlOrConstOrMetadata().add(v2);
             return trigger;
         } else if (op.getText().equals(">")) {
-            GreaterThanComparisonTrigger trigger = new GreaterThanComparisonTrigger();
+            GreaterThanComparisonTrigger trigger = objectFactory.createGreaterThanComparisonTrigger();
             trigger.getControlOrConstOrMetadata().add(v1);
             trigger.getControlOrConstOrMetadata().add(v2);
             return trigger;
         } else if (op.getText().equals("==")) {
-            EqualComparisonTrigger trigger = new EqualComparisonTrigger();
+            EqualComparisonTrigger trigger = objectFactory.createEqualComparisonTrigger();
             trigger.getControlOrConstOrMetadata().add(v1);
             trigger.getControlOrConstOrMetadata().add(v2);
             return trigger;
         } else if (op.getText().equals(">=")) {
-            GreaterOrEqualThanComparisonTrigger trigger = new GreaterOrEqualThanComparisonTrigger();
+            GreaterOrEqualThanComparisonTrigger trigger = objectFactory.createGreaterOrEqualThanComparisonTrigger();
             trigger.getControlOrConstOrMetadata().add(v1);
             trigger.getControlOrConstOrMetadata().add(v2);
             return trigger;
         } else if (op.getText().equals("<=")) {
-            LessOrEqualThanComparisonTrigger trigger = new LessOrEqualThanComparisonTrigger();
+            LessOrEqualThanComparisonTrigger trigger = objectFactory.createLessOrEqualThanComparisonTrigger();
             trigger.getControlOrConstOrMetadata().add(v1);
             trigger.getControlOrConstOrMetadata().add(v2);
             return trigger;
         } else if (op.getText().equals("<>")) {
-            DifferentComparisonTrigger trigger = new DifferentComparisonTrigger();
+            DifferentComparisonTrigger trigger = objectFactory.createDifferentComparisonTrigger();
             trigger.getControlOrConstOrMetadata().add(v1);
             trigger.getControlOrConstOrMetadata().add(v2);
             return trigger;
         } else if (op.getText().equals("!=")) {
-            DifferentComparisonTrigger trigger = new DifferentComparisonTrigger();
+            DifferentComparisonTrigger trigger = objectFactory.createDifferentComparisonTrigger();
             trigger.getControlOrConstOrMetadata().add(v1);
             trigger.getControlOrConstOrMetadata().add(v2);
             return trigger;
         } else if (op.IS() != null) {
             if (op.NOT() == null) {
                 // IS
-                EqualComparisonTrigger trigger = new EqualComparisonTrigger();
+                EqualComparisonTrigger trigger = objectFactory.createEqualComparisonTrigger();
                 trigger.getControlOrConstOrMetadata().add(v1);
                 trigger.getControlOrConstOrMetadata().add(v2);
                 return trigger;
             } else {
                 // IS NOT
-                DifferentComparisonTrigger trigger = new DifferentComparisonTrigger();
+                DifferentComparisonTrigger trigger = objectFactory.createDifferentComparisonTrigger();
                 trigger.getControlOrConstOrMetadata().add(v1);
                 trigger.getControlOrConstOrMetadata().add(v2);
                 return trigger;
@@ -218,29 +218,29 @@ public class WhenParser {
         if (term.literal() != null) {
             if (term.literal().bool() != null) {
                 if (term.literal().bool().TRUE() != null) {
-                    ConstTriggerValue val = new ConstTriggerValue();
+                    ConstTriggerValue val = objectFactory.createConstTriggerValue();
                     val.setVal("True");
                     return val;
                 } else if (term.literal().bool().TRUE() != null) {
-                    ConstTriggerValue val = new ConstTriggerValue();
+                    ConstTriggerValue val = objectFactory.createConstTriggerValue();
                     val.setVal("False");
                     return val;
                 }
             } else if (term.literal().NUM() != null) {
-                ConstTriggerValue val = new ConstTriggerValue();
+                ConstTriggerValue val = objectFactory.createConstTriggerValue();
                 val.setVal(term.literal().NUM().getText());
                 return val;
             } else if (term.literal().STRING() != null) {
-                ConstTriggerValue val = new ConstTriggerValue();
+                ConstTriggerValue val = objectFactory.createConstTriggerValue();
                 val.setVal(this.helper.getString(term.literal().STRING().getText()));
                 return val;
             }
         } else if (term.METADATA() != null) {
-            MetadataTriggerValue metadata = new MetadataTriggerValue();
+            MetadataTriggerValue metadata = objectFactory.createMetadataTriggerValue();
             metadata.setName(this.helper.getMetadataName(term.METADATA().getText()));
             return metadata;
         } else if (term.control() != null) {
-            ControlTriggerValue control = new ControlTriggerValue();
+            ControlTriggerValue control = objectFactory.createControlTriggerValue();
             // TODO: Get the control by the alias
             control.setId(term.control().NAME(term.control().NAME().size() > 1 ? 1 : 0).getText());
             return control;
@@ -268,11 +268,11 @@ public class WhenParser {
     }
 
     private Trigger getBooleanTrigger(boolean b) {
-        ConstTriggerValue val1 = new ConstTriggerValue();
+        ConstTriggerValue val1 = objectFactory.createConstTriggerValue();
         val1.setVal("a");
-        ConstTriggerValue val2 = new ConstTriggerValue();
+        ConstTriggerValue val2 = objectFactory.createConstTriggerValue();
         val2.setVal(b ? "a" : "b");
-        EqualComparisonTrigger eq = new EqualComparisonTrigger();
+        EqualComparisonTrigger eq = objectFactory.createEqualComparisonTrigger();
         eq.getControlOrConstOrMetadata().add(val1);
         eq.getControlOrConstOrMetadata().add(val2);
         return eq;
