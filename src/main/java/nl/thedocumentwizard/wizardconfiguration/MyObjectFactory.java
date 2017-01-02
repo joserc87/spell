@@ -92,7 +92,7 @@ public class MyObjectFactory extends ObjectFactory {
 
     @Override
     public Steptype createSteptype() {
-        return super.createSteptype();
+        return new Step(super.createSteptype());
     }
 
     @Override
@@ -132,7 +132,7 @@ public class MyObjectFactory extends ObjectFactory {
 
     @Override
     public ControlTriggerValue createControlTriggerValue() {
-        return super.createControlTriggerValue();
+        return new ControlValue(super.createControlTriggerValue());
     }
 
     @Override
@@ -222,7 +222,7 @@ public class MyObjectFactory extends ObjectFactory {
 
     @Override
     public ArrayOfWizardCondition.Condition createArrayOfWizardConditionCondition() {
-        return super.createArrayOfWizardConditionCondition();
+        return new Condition(super.createArrayOfWizardConditionCondition());
     }
 
     @Override
