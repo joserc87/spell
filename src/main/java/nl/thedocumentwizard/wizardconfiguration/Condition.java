@@ -1,17 +1,16 @@
 package nl.thedocumentwizard.wizardconfiguration;
 
-import nl.thedocumentwizard.wizardconfiguration.decorator.ConditionDecorator;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.ArrayOfWizardCondition;
 
 /**
  * Created by jose on 02/01/2017.
  */
-public class Condition extends ConditionDecorator {
+public class Condition extends ArrayOfWizardCondition.Condition {
 
     private String nextStepAlias;
 
-    public Condition(ArrayOfWizardCondition.Condition delegate) {
-        super(delegate);
+    public Condition() {
+        super();
     }
 
     public String getNextStepAlias() {

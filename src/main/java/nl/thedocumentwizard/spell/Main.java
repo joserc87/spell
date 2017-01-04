@@ -42,6 +42,8 @@ public class Main {
     MetadataStore metadataStore;
     DocumentTypeType documentType;
 
+    StepAliasHelper aliasHelper;
+
     public void printUsage() {
         System.out.println(
                 ////////////////////////////////////////////////////////////////////////////
@@ -62,6 +64,7 @@ public class Main {
     public WizardConfiguration parseWizard() {
         // Dependencies
         ParsingHelper helper = new ParsingHelper();
+        aliasHelper = new StepAliasHelper();
         ObjectFactory factory = new MyObjectFactory();
         ControlParser controlParser = new ControlParser(factory, helper);
         WhenParser whenParser = new WhenParser(factory, helper);
@@ -87,7 +90,7 @@ public class Main {
 
         // Walk it and attach our listener
         ParseTreeWalker walker = new ParseTreeWalker();
-        MySpellListener listener = new MySpellListener(factory, controlParser, whenParser, helper);
+        MySpellListener listener = new MySpellListener(factory, controlParser, whenParser, helper, aliasHelper);
         walker.walk(listener, wizardSentenceContext);
 
         // Marshall the wizard:
@@ -99,6 +102,7 @@ public class Main {
         // Postprocess the wizard:
         PostProcessor postProcessor = new PostProcessor(this.metadataStore);
         postProcessor.assignStepIDs(wizard);
+        postProcessor.assignQuestionIDs(wizard);
         if (this.metadataStore != null) {
             postProcessor.assignMetadataIDs(wizard);
         }
@@ -107,6 +111,8 @@ public class Main {
             wizard.setDocumentTypeName(this.documentType.getName());
             wizard.setDocumentTypeID(this.documentType.getGuid());
         }
+        // Link the steps and controls by alias
+        postProcessor.resolveAlias(wizard, this.aliasHelper);
     }
 
     public void writeWizard(WizardConfiguration wizard) {

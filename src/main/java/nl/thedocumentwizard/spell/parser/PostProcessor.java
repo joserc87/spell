@@ -1,8 +1,14 @@
 package nl.thedocumentwizard.spell.parser;
 
 import nl.thedocumentwizard.spell.MetadataStore;
+import nl.thedocumentwizard.wizardconfiguration.Condition;
+import nl.thedocumentwizard.wizardconfiguration.ControlValue;
+import nl.thedocumentwizard.wizardconfiguration.Step;
 import nl.thedocumentwizard.wizardconfiguration.WizardConfiguration;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jose on 21/12/2016.
@@ -27,6 +33,72 @@ public class PostProcessor {
             }
         }
     }
+
+    /**
+     * Set the IDs for the questions and the controls inside the questions.
+     * @param wizard The wizard that contains the questions and controls
+     */
+    public void assignQuestionIDs(WizardConfiguration wizard) {
+        if (wizard.getSteps() != null) {
+            for (Steptype step : wizard.getSteps().getStep()) {
+                if (step.getQuestions() != null) {
+                    int questionNum = 1;
+                    for (ArrayOfWizardQuestion.Question question : step.getQuestions().getQuestion()) {
+                        question.setId("QUESTION_" + questionNum);
+                        String controlID = "CONTROL_" + questionNum;
+                        this.assignControlID(question.getLabel(), controlID);
+                        this.assignControlID(question.getString(), controlID);
+                        this.assignControlID(question.getEmail(), controlID);
+                        this.assignControlID(question.getText(), controlID);
+                        this.assignControlID(question.getNumber(), controlID);
+                        this.assignControlID(question.getDate(), controlID);
+                        this.assignControlID(question.getImage(), controlID);
+                        this.assignControlID(question.getAttachment(), controlID);
+                        this.assignControlID(question.getCheckbox(), controlID);
+                        this.assignControlID(question.getRadio(), controlID);
+                        this.assignControlID(question.getList(), controlID);
+                        this.assignControlID(question.getMulti(), controlID);
+                        questionNum++;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Set the ID for a control, and all the subcontrols inside, recursively
+     * @param control The control to set the ID
+     * @param id The ID of the control, e.g. "CONTROL_2_1". Subcontrols will be set with id + "_X".
+     */
+    private void assignControlID(AbstractControl control, String id) {
+        if (control != null) {
+            control.setId(id);
+            // Set ids to subcontrols, recursively
+            if (control instanceof RadioControl) {
+                RadioControl radio = (RadioControl) control;
+                if (radio.getItems() != null) {
+                    int i = 1;
+                    for (AbstractControl subcontrol : radio.getItems().getTextOrCheckboxOrAttachment()) {
+                        assignControlID(subcontrol, id + "_" + i);
+                        i++;
+                    }
+                }
+            } else if (control instanceof MultiControl) {
+                MultiControl multi = (MultiControl) control;
+                if (multi.getControls() != null) {
+                    int i = 1;
+                    for (AbstractControl subcontrol : multi.getControls().getTextOrNumberOrAttachment()) {
+                        assignControlID(subcontrol, id + "_" + i);
+                        i++;
+                    }
+                }
+            } else if (control instanceof FileControl) {
+                FileControl fileControl = (FileControl) control;
+                assignControlID(fileControl.getFileName(), id + "_1");
+            }
+        }
+    }
+
     private String findMetadataIDByName(String name) {
         if (this.metadataStore != null) {
             String guid = this.metadataStore.findMetadataIDByName(name);
@@ -198,7 +270,173 @@ public class PostProcessor {
             }
 
         }
+    }
 
+    public void resolveAlias(WizardConfiguration wizard, StepAliasHelper aliasHelper) {
+        if (wizard.getSteps() != null) {
+            for (Steptype step : wizard.getSteps().getStep()) {
+                String nextStepAlias = step instanceof Step ? ((Step) step).getNextStepAlias() : null;
+                // Translate next step:
+                if (nextStepAlias != null) {
+                    ControlAliasHelper nextStepAliasHelper = aliasHelper.getAliasHelperForStepAlias(nextStepAlias);
+                    if (nextStepAliasHelper != null) { // If next step exists:
+                        // Set the ID for the next step
+                        step.setNextStepID(nextStepAliasHelper.getStep().getId());
+                    } else {
+                        System.err.println("In step " + step.getId() +
+                                ": Step '" + nextStepAlias + "' does not exist");
+                    }
+                }
+                // Translate conditional next step:
+                if (step.getConditions() != null) {
+                    for(ArrayOfWizardCondition.Condition condition : step.getConditions().getCondition()) {
+                        String conditionalNextStepAlias = ((Condition)condition).getNextStepAlias();
+                        if (conditionalNextStepAlias != null) {
+                            ControlAliasHelper nextStepAliasHelper = aliasHelper.getAliasHelperForStepAlias(conditionalNextStepAlias);
+                            if (nextStepAliasHelper != null) { // If next step exists:
+                                // Set the ID for the next step
+                                condition.setNextStepID(nextStepAliasHelper.getStep().getId());
+                            } else {
+                                System.err.println("In condition in step " + step.getId() +
+                                        ": Step '" + conditionalNextStepAlias + "' does not exist.");
+                            }
+                        }
+                    }
+                }
+                // Translate ControlTriggerValue:
+                ArrayList<ControlValue> controlValues = new ArrayList<ControlValue>();
+                // Conditions
+                if (step.getConditions() != null) {
+                    for (ArrayOfWizardCondition.Condition condition : step.getConditions().getCondition()) {
+                        findControlValues(condition.getAnd()               , controlValues);
+                        findControlValues(condition.getOr()                , controlValues);
+                        findControlValues(condition.getNot()               , controlValues);
+                        findControlValues(condition.getEmpty()             , controlValues);
+                        findControlValues(condition.getEqual()             , controlValues);
+                        findControlValues(condition.getDifferent()         , controlValues);
+                        findControlValues(condition.getGreaterOrEqualThan(), controlValues);
+                        findControlValues(condition.getGreaterThan()       , controlValues);
+                        findControlValues(condition.getLessOrEqualThan()   , controlValues);
+                        findControlValues(condition.getLessThan()          , controlValues);
+                        findControlValues(condition.getRegEx()             , controlValues);
+                    }
+                }
+                // AdvancedRules
+                if (step.getAdvancedRules() != null) {
+                    for (ArrayOfWizardAdvancedRule.AdvancedRule ar : step.getAdvancedRules().getAdvancedRule()) {
+                        findControlValues(ar.getAnd()               , controlValues);
+                        findControlValues(ar.getOr()                , controlValues);
+                        findControlValues(ar.getNot()               , controlValues);
+                        findControlValues(ar.getEmpty()             , controlValues);
+                        findControlValues(ar.getEqual()             , controlValues);
+                        findControlValues(ar.getDifferent()         , controlValues);
+                        findControlValues(ar.getGreaterOrEqualThan(), controlValues);
+                        findControlValues(ar.getGreaterThan()       , controlValues);
+                        findControlValues(ar.getLessOrEqualThan()   , controlValues);
+                        findControlValues(ar.getLessThan()          , controlValues);
+                        findControlValues(ar.getRegEx()             , controlValues);
+                    }
+                }
+                ControlAliasHelper currentStepAliasHelper = aliasHelper.getAliasHelperForStep(step);
+                for (ControlValue val : controlValues) {
+                    ControlAliasHelper referencedStepAliasHelper;
+                    // If STEP.CONTROL, find the step
+                    if (val.getStepAlias() != null) {
+                        referencedStepAliasHelper = aliasHelper.getAliasHelperForStepAlias(val.getStepAlias());
+                    } else {
+                        // Otherwise, use the current step implicitly
+                        referencedStepAliasHelper = currentStepAliasHelper;
+                    }
 
+                    if (referencedStepAliasHelper != null) {
+                        AbstractControl referencedControl = referencedStepAliasHelper.findControl(val.getControlAlias());
+                        // The step ID will only be explicit when the form Step.Control is used.
+                        if (val.getStepAlias() != null) {
+                            val.setStep(referencedStepAliasHelper.getStep().getId());
+                        }
+                        if (referencedControl != null) {
+                            val.setId(referencedControl.getId());
+                        } else {
+                            System.err.println("Control " + val.getControlAlias() + " does not exist");
+                        }
+                    } else {
+                        System.err.println("Step " + val.getStepAlias() + " does not exist");
+                    }
+                }
+            }
+        }
+    }
+
+    public void findControlValues(Trigger t, List<ControlValue> values) {
+        if (t != null) {
+            if (t instanceof AndTrigger) {
+                AndTrigger and = (AndTrigger) t;
+                for (Trigger subt : and.getOrOrLessThanOrRegEx()) {
+                    findControlValues(subt, values);
+                }
+            } else if (t instanceof OrTrigger) {
+                OrTrigger or = (OrTrigger) t;
+                for (Trigger subt : or.getOrOrLessThanOrRegEx()) {
+                    findControlValues(subt, values);
+                }
+            } else if (t instanceof NotTrigger) {
+                NotTrigger not = (NotTrigger) t;
+                for (Trigger subt : not.getOrOrLessThanOrRegEx()) {
+                    findControlValues(subt, values);
+                }
+            } else if (t instanceof EmptyTrigger) {
+                EmptyTrigger et = (EmptyTrigger) t;
+                if (et.getControl() != null) {
+                    values.add((ControlValue)et.getControl());
+                }
+            } else if (t instanceof RegexTrigger) {
+                RegexTrigger rt = (RegexTrigger) t;
+                if (rt.getControl() != null) {
+                    values.add((ControlValue)rt.getControl());
+                }
+            } else if (t instanceof EqualComparisonTrigger) {
+                EqualComparisonTrigger eqt = (EqualComparisonTrigger)t;
+                for (TriggerValue val : eqt.getControlOrConstOrMetadata()) {
+                    if (val instanceof ControlTriggerValue) {
+                        values.add((ControlValue)val);
+                    }
+                }
+            } else if (t instanceof DifferentComparisonTrigger) {
+                DifferentComparisonTrigger dift = (DifferentComparisonTrigger)t;
+                for (TriggerValue val : dift.getControlOrConstOrMetadata()) {
+                    if (val instanceof ControlTriggerValue) {
+                        values.add((ControlValue)val);
+                    }
+                }
+            } else if (t instanceof GreaterOrEqualThanComparisonTrigger) {
+                GreaterOrEqualThanComparisonTrigger get = (GreaterOrEqualThanComparisonTrigger)t;
+                for (TriggerValue val : get.getControlOrConstOrMetadata()) {
+                    if (val instanceof ControlTriggerValue) {
+                        values.add((ControlValue)val);
+                    }
+                }
+            } else if (t instanceof GreaterThanComparisonTrigger) {
+                GreaterThanComparisonTrigger gt = (GreaterThanComparisonTrigger)t;
+                for (TriggerValue val : gt.getControlOrConstOrMetadata()) {
+                    if (val instanceof ControlTriggerValue) {
+                        values.add((ControlValue)val);
+                    }
+                }
+            } else if (t instanceof LessOrEqualThanComparisonTrigger) {
+                LessOrEqualThanComparisonTrigger let = (LessOrEqualThanComparisonTrigger)t;
+                for (TriggerValue val : let.getControlOrConstOrMetadata()) {
+                    if (val instanceof ControlTriggerValue) {
+                        values.add((ControlValue)val);
+                    }
+                }
+            } else if (t instanceof LessThanComparisonTrigger) {
+                LessThanComparisonTrigger lt = (LessThanComparisonTrigger)t;
+                for (TriggerValue val : lt.getControlOrConstOrMetadata()) {
+                    if (val instanceof ControlTriggerValue) {
+                        values.add((ControlValue)val);
+                    }
+                }
+            }
+        }
     }
 }

@@ -10,10 +10,19 @@ import java.lang.reflect.InvocationTargetException;
 public class ControlParser {
     private ObjectFactory objectFactory;
     private ParsingHelper helper;
+    private ControlAliasHelper aliasHelper;
 
     public ControlParser(ObjectFactory factory, ParsingHelper helper) {
         this.objectFactory = factory;
         this.helper = helper;
+    }
+
+    public ControlAliasHelper getAliasHelper() {
+        return aliasHelper;
+    }
+
+    public void setAliasHelper(ControlAliasHelper aliasHelper) {
+        this.aliasHelper = aliasHelper;
     }
 
     /**
@@ -23,8 +32,8 @@ public class ControlParser {
      * @param control The abstract control to set
      */
     public void setAbstractControl(Object ctx, AbstractControl control) {
-        // Default value (control "question" = defautValue)
         try {
+            // Default value (control "question" = defaultValue)
             SpellParser.Default_valueContext defaultValue = (SpellParser.Default_valueContext) ctx.getClass().getMethod("default_value").invoke(ctx);
             if (defaultValue != null) {
                 String value = null;
@@ -51,6 +60,12 @@ public class ControlParser {
                 if (metadataName != null) {
                     control.setMetadataName(metadataName);
                 }
+            }
+            // Alias:
+            SpellParser.AliasContext alias = (SpellParser.AliasContext) ctx.getClass().getMethod("alias").invoke(ctx);
+            if (alias != null) {
+                String aliasName = alias.NAME().getText();
+                aliasHelper.registerControl(aliasName, control);
             }
         } catch (NoSuchMethodException e) {
             // It's ok if the method does not exist

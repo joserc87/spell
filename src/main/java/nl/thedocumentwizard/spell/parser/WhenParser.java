@@ -1,5 +1,6 @@
 package nl.thedocumentwizard.spell.parser;
 
+import nl.thedocumentwizard.wizardconfiguration.ControlValue;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
 
 /**
@@ -111,11 +112,13 @@ public class WhenParser {
                     // - Get the control
                     // - Check that the control is a checkbox.
                     // - Return checkbox == "True". Otherwise, error
-                    ControlTriggerValue control = objectFactory.createControlTriggerValue();
+                    ControlValue control = (ControlValue) objectFactory.createControlTriggerValue();
                     if (term.control().NAME().size() > 1) {
-                        control.setStep(-1);
+                        control.setStepAlias(term.control().NAME(0).getText());
+                        control.setControlAlias(term.control().NAME(1).getText());
+                    } else {
+                        control.setControlAlias(term.control().NAME(0).getText());
                     }
-                    control.setId(term.control().NAME(term.control().NAME().size() > 1 ? 1 : 0).getText());
 
                     ConstTriggerValue constVal = objectFactory.createConstTriggerValue();
                     constVal.setVal("True");
@@ -240,9 +243,13 @@ public class WhenParser {
             metadata.setName(this.helper.getMetadataName(term.METADATA().getText()));
             return metadata;
         } else if (term.control() != null) {
-            ControlTriggerValue control = objectFactory.createControlTriggerValue();
-            // TODO: Get the control by the alias
-            control.setId(term.control().NAME(term.control().NAME().size() > 1 ? 1 : 0).getText());
+            ControlValue control = (ControlValue) objectFactory.createControlTriggerValue();
+            if (term.control().NAME().size() > 1) {
+                control.setStepAlias(term.control().NAME(0).getText());
+                control.setControlAlias(term.control().NAME(1).getText());
+            } else {
+                control.setControlAlias(term.control().NAME(0).getText());
+            }
             return control;
         }
         return null;

@@ -1,17 +1,16 @@
 package nl.thedocumentwizard.wizardconfiguration;
 
-import nl.thedocumentwizard.wizardconfiguration.decorator.ControlTriggerValueDecorator;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.ControlTriggerValue;
 
 /**
  * Custom ControlTriggerValue
  */
-public class ControlValue extends ControlTriggerValueDecorator {
+public class ControlValue extends ControlTriggerValue {
     private String stepAlias;
     private String controlAlias;
 
-    public ControlValue(ControlTriggerValue decoratedControlTriggerValue) {
-        super(decoratedControlTriggerValue);
+    public ControlValue() {
+        super();
     }
 
     public String getStepAlias() {

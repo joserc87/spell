@@ -1,7 +1,6 @@
 package nl.thedocumentwizard.wizardconfiguration;
 
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
-import nl.thedocumentwizard.wizardconfiguration.decorator.WizardDecorator;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.Wizard;
 
 import javax.xml.bind.JAXBContext;
@@ -10,18 +9,15 @@ import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 /**
  * Adds functionality to the JAXB class
  */
-public class WizardConfiguration extends WizardDecorator {
+public class WizardConfiguration extends Wizard {
 
-    public WizardConfiguration(Wizard decoratedObject) {
-        super(decoratedObject);
+    public WizardConfiguration() {
+        super();
     }
 
     /**
@@ -41,7 +37,6 @@ public class WizardConfiguration extends WizardDecorator {
      * @category IO
      */
     public boolean marshall(OutputStream os, boolean prettyPrint, String comments) {
-        Wizard wizard = this.getDecoratedWizard();
         boolean ok = false;
         try{
             //Prepare JAXB objects
@@ -64,7 +59,7 @@ public class WizardConfiguration extends WizardDecorator {
                 strWriter.writeCharacters("\n");
             }
             //Tell JAXB to marshall to the filter which in turn will call the writer
-            m.marshal(wizard, strWriter);
+            m.marshal(this, strWriter);
             ok = true;
         } catch (XMLStreamException e) {
             // TODO Auto-generated catch block

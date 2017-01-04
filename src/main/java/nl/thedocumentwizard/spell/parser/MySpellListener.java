@@ -1,6 +1,8 @@
 
 package nl.thedocumentwizard.spell.parser;
 
+import nl.thedocumentwizard.wizardconfiguration.Condition;
+import nl.thedocumentwizard.wizardconfiguration.Step;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
 
 public class MySpellListener extends SpellBaseListener {
@@ -9,12 +11,18 @@ public class MySpellListener extends SpellBaseListener {
     private ControlParser controlParser;
     private WhenParser whenParser;
     private ParsingHelper helper;
+    private StepAliasHelper aliasHelper;
     private Wizard wizard;
-    public MySpellListener(ObjectFactory factory, ControlParser controlParser, WhenParser whenParser, ParsingHelper helper) {
+    public MySpellListener(ObjectFactory factory,
+                           ControlParser controlParser,
+                           WhenParser whenParser,
+                           ParsingHelper helper,
+                           StepAliasHelper aliasHelper) {
         this.objectFactory = factory;
         this.controlParser = controlParser;
         this.whenParser = whenParser;
         this.helper = helper;
+        this.aliasHelper = aliasHelper;
     }
 
     public Wizard getWizard() {
@@ -49,12 +57,21 @@ public class MySpellListener extends SpellBaseListener {
      * @return A Steptype
      */
     protected Steptype getStep(SpellParser.StepContext ctx) {
-        Steptype step = objectFactory.createSteptype();
+        Step step = (Step)objectFactory.createSteptype();
         // Step name and groupName
         step.setName(helper.getString(ctx.STRING(0)));
         if (ctx.STRING().size() > 1) {
             step.setGroupName(helper.getString(ctx.STRING(1)));
         }
+        // Alias:
+        if (ctx.alias() != null) {
+            String alias = ctx.alias().NAME().getText();
+            step.setNextStepAlias(alias);
+            aliasHelper.registerStep(alias, step);
+        } else {
+            aliasHelper.registerStep(step);
+        }
+        controlParser.setAliasHelper(aliasHelper.getAliasHelperForStep(step));
         // Questions:
         for (SpellParser.QuestionContext questionContext : ctx.question()) {
             if (step.getQuestions() == null) {
@@ -69,6 +86,7 @@ public class MySpellListener extends SpellBaseListener {
         // Next step:
         if (ctx.jump() != null && ctx.jump().size() > 0) {
             String nextStepName = ctx.jump().get(ctx.jump().size() - 1).NAME().getText();
+            step.setNextStepAlias(nextStepName);
             // step.setNextStepName(nextStepName);
         }
         // Advanced rules:
@@ -119,7 +137,7 @@ public class MySpellListener extends SpellBaseListener {
         // Create Advanced rules and conditions
         if (ctx.when_instruction() != null) {
             ArrayOfWizardAdvancedRule.AdvancedRule ar = null;
-            ArrayOfWizardCondition.Condition condition = null;
+            Condition condition = null;
             for (SpellParser.When_instructionContext instruction : ctx.when_instruction()) {
                 // Advanced rule:
                 if (instruction.metadata_assignment() != null) {
@@ -141,7 +159,7 @@ public class MySpellListener extends SpellBaseListener {
                 } else if (instruction.jump() != null) {
                     // Condition
                     if (condition == null) {
-                        condition = objectFactory.createArrayOfWizardConditionCondition();
+                        condition = (Condition) objectFactory.createArrayOfWizardConditionCondition();
                         if (step.getConditions() == null) {
                             step.setConditions(objectFactory.createArrayOfWizardCondition());
                         }
@@ -149,9 +167,8 @@ public class MySpellListener extends SpellBaseListener {
                         this.setConditionTrigger(condition, t);
                     }
                     // Goto
-                    // TODO: Get step by alias and go to that step
                     String nextStepName = instruction.jump().NAME().getText();
-                    condition.setNextStepName(nextStepName);
+                    condition.setNextStepAlias(nextStepName);
                 } else if (instruction.when() != null) {
                     parseWhen(instruction.when(), step, t);
                 }

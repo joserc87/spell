@@ -1,16 +1,17 @@
 package nl.thedocumentwizard.spell.parser;
 
 import nl.thedocumentwizard.spell.MetadataStore;
+import nl.thedocumentwizard.wizardconfiguration.Condition;
+import nl.thedocumentwizard.wizardconfiguration.ControlValue;
+import nl.thedocumentwizard.wizardconfiguration.Step;
 import nl.thedocumentwizard.wizardconfiguration.WizardConfiguration;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.stubbing.OngoingStubbing;
 
-import java.awt.*;
+import java.util.List;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,7 +31,7 @@ public class PostProcessorTest {
 
     @Test
     public void testAssignStepIDs() throws Exception {
-        WizardConfiguration wizard = new WizardConfiguration(new Wizard());
+        WizardConfiguration wizard = new WizardConfiguration();
         wizard.setSteps(new ArrayOfSteptype());
         wizard.getSteps().getStep().add(new Steptype());
         wizard.getSteps().getStep().add(new Steptype());
@@ -46,8 +47,63 @@ public class PostProcessorTest {
     }
 
     @Test
+    public void testAssignQuestionIDs() throws Exception {
+        WizardConfiguration wizard = new WizardConfiguration();
+        wizard.setSteps(new ArrayOfSteptype());
+        wizard.getSteps().getStep().add(new Steptype());
+        wizard.getSteps().getStep().add(new Steptype());
+
+        // Step 1 has 3 questions
+        wizard.getSteps().getStep().get(0).setQuestions(new ArrayOfWizardQuestion());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
+
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(0).setString(new StringControl());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(1).setLabel(new LabelControl());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(2).setRadio(new RadioControl());
+
+        // Control 3 is a radio { label, multi { label, string } }
+        RadioControl radio = wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(2).getRadio();
+        radio.setItems(new ArrayOfChoice1());
+        radio.getItems().getTextOrCheckboxOrAttachment().add(new LabelControl());
+        MultiControl multi = new MultiControl();
+        radio.getItems().getTextOrCheckboxOrAttachment().add(multi);
+        multi.setControls(new ArrayOfChoice2());
+        multi.getControls().getTextOrNumberOrAttachment().add(new LabelControl());
+        multi.getControls().getTextOrNumberOrAttachment().add(new StringControl());
+
+        // Step 2 has only 1 question
+        wizard.getSteps().getStep().get(1).setQuestions(new ArrayOfWizardQuestion());
+        wizard.getSteps().getStep().get(1).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
+        wizard.getSteps().getStep().get(1).getQuestions().getQuestion().get(0).setImage(new ImageFileControl());
+        wizard.getSteps().getStep().get(1).getQuestions().getQuestion().get(0).getImage().setFileName(new FileNameControl());
+
+        postProcessor.assignQuestionIDs(wizard);
+
+        // Question IDs
+        List<ArrayOfWizardQuestion.Question> s1Questions = wizard.getSteps().getStep().get(0).getQuestions().getQuestion();
+        List<ArrayOfWizardQuestion.Question> s2Questions = wizard.getSteps().getStep().get(1).getQuestions().getQuestion();
+        Assert.assertEquals("QUESTION_1", s1Questions.get(0).getId());
+        Assert.assertEquals("QUESTION_2", s1Questions.get(1).getId());
+        Assert.assertEquals("QUESTION_3", s1Questions.get(2).getId());
+        Assert.assertEquals("QUESTION_1", s2Questions.get(0).getId());
+
+        // Control IDs
+        Assert.assertEquals("CONTROL_1", s1Questions.get(0).getString().getId());
+        Assert.assertEquals("CONTROL_2", s1Questions.get(1).getLabel().getId());
+        Assert.assertEquals("CONTROL_3", s1Questions.get(2).getRadio().getId());
+        Assert.assertEquals("CONTROL_3_1", radio.getItems().getTextOrCheckboxOrAttachment().get(0).getId());
+        Assert.assertEquals("CONTROL_3_2", radio.getItems().getTextOrCheckboxOrAttachment().get(1).getId());
+        Assert.assertEquals("CONTROL_3_2_1", multi.getControls().getTextOrNumberOrAttachment().get(0).getId());
+        Assert.assertEquals("CONTROL_3_2_2", multi.getControls().getTextOrNumberOrAttachment().get(1).getId());
+        Assert.assertEquals("CONTROL_1", s2Questions.get(0).getImage().getId());
+        Assert.assertEquals("CONTROL_1_1", s2Questions.get(0).getImage().getFileName().getId());
+    }
+
+    @Test
     public void testAssignMetadataIDs() {
-        WizardConfiguration wizard = new WizardConfiguration(new Wizard());
+        WizardConfiguration wizard = new WizardConfiguration();
         wizard.setSteps(new ArrayOfSteptype());
         wizard.getSteps().getStep().add(new Steptype());
         wizard.getSteps().getStep().add(new Steptype());
@@ -146,5 +202,130 @@ public class PostProcessorTest {
                         // Equal
                         .getControlOrConstOrMetadata().get(0)).getId());
 
+    }
+
+    @Test
+    public void resolveAlias_should_translate_default_next_step() throws Exception {
+        // The wizard
+        WizardConfiguration wizard = new WizardConfiguration();
+        wizard.setSteps(new ArrayOfSteptype());
+        wizard.getSteps().getStep().add(new Step());
+        wizard.getSteps().getStep().add(new Step());
+
+        // Step 0: goto stepAlias
+        ((Step)wizard.getSteps().getStep().get(0)).setNextStepAlias("stepAlias");
+        // Step 1 with id 123
+        wizard.getSteps().getStep().get(1).setId(123);
+
+        // The alias helper:
+        StepAliasHelper stepAliasHelper = mock(StepAliasHelper.class);
+        ControlAliasHelper referencedAliasHelper = mock(ControlAliasHelper.class);
+
+        when(stepAliasHelper.getAliasHelperForStepAlias("stepAlias")).thenReturn(referencedAliasHelper);
+        when(referencedAliasHelper.getStep()).thenReturn(wizard.getSteps().getStep().get(1));
+
+        // translate
+        postProcessor.resolveAlias(wizard, stepAliasHelper);
+
+        // The next step should have been translated
+        Assert.assertEquals(123, (int)wizard.getSteps().getStep().get(0).getNextStepID());
+    }
+
+    @Test
+    public void resolveAlias_should_translate_condition_next_step() throws Exception {
+        // The wizard
+        WizardConfiguration wizard = new WizardConfiguration();
+        wizard.setSteps(new ArrayOfSteptype());
+        wizard.getSteps().getStep().add(new Step());
+        wizard.getSteps().getStep().add(new Step());
+
+        // Step 0: when X goto stepAlias
+        Condition condition = new Condition();
+        wizard.getSteps().getStep().get(0).setConditions(new ArrayOfWizardCondition());
+        wizard.getSteps().getStep().get(0).getConditions().getCondition().add(condition);
+        condition.setNextStepAlias("stepAlias");
+        // Step 1 with id 123 (as stepAlias)
+        wizard.getSteps().getStep().get(1).setId(123);
+
+        // The alias helper:
+        StepAliasHelper stepAliasHelper = mock(StepAliasHelper.class);
+        ControlAliasHelper referencedAliasHelper = mock(ControlAliasHelper.class);
+
+        when(stepAliasHelper.getAliasHelperForStepAlias("stepAlias")).thenReturn(referencedAliasHelper);
+        when(referencedAliasHelper.getStep()).thenReturn(wizard.getSteps().getStep().get(1));
+
+        // translate
+        postProcessor.resolveAlias(wizard, stepAliasHelper);
+
+        // The next step of the condition should have been translated
+        Assert.assertEquals(123, wizard.getSteps().getStep().get(0).getConditions().getCondition().get(0).getNextStepID());
+    }
+
+    @Test
+    public void resolveAlias_should_translate_control_trigger_value() throws Exception {
+        // The wizard
+        WizardConfiguration wizard = new WizardConfiguration();
+        wizard.setSteps(new ArrayOfSteptype());
+        wizard.getSteps().getStep().add(new Step());
+        wizard.getSteps().getStep().add(new Step());
+        wizard.getSteps().getStep().get(0).setId(123);
+        wizard.getSteps().getStep().get(1).setId(456);
+
+        // Step 1, String as controlAlias1:
+        wizard.getSteps().getStep().get(0).setQuestions(new ArrayOfWizardQuestion());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(0).setString(new StringControl());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(0).getString().setId("CONTROL_123");
+        // Step 2, Label as controlAlias2
+        wizard.getSteps().getStep().get(1).setQuestions(new ArrayOfWizardQuestion());
+        wizard.getSteps().getStep().get(1).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
+        wizard.getSteps().getStep().get(1).getQuestions().getQuestion().get(0).setLabel(new LabelControl());
+        wizard.getSteps().getStep().get(1).getQuestions().getQuestion().get(0).getLabel().setId("CONTROL_456");
+
+        // when ControlAlias ...
+        Condition condition = new Condition();
+        wizard.getSteps().getStep().get(0).setConditions(new ArrayOfWizardCondition());
+        wizard.getSteps().getStep().get(0).getConditions().getCondition().add(condition);
+        condition.setEqual(new EqualComparisonTrigger());
+        ControlValue controlValue1 = new ControlValue();
+        condition.getEqual().getControlOrConstOrMetadata().add(controlValue1);
+        controlValue1.setControlAlias("controlAlias");
+
+        // when StepAlias.ControlAlias ...
+        Condition condition2 = new Condition();
+        wizard.getSteps().getStep().get(0).getConditions().getCondition().add(condition2);
+        condition2.setEqual(new EqualComparisonTrigger());
+        ControlValue controlValue2 = new ControlValue();
+        condition2.getEqual().getControlOrConstOrMetadata().add(controlValue2);
+        controlValue2.setControlAlias("controlAlias");
+        controlValue2.setStepAlias("stepAlias");
+
+        // Step 1 with id 123 (as stepAlias)
+        wizard.getSteps().getStep().get(1).setId(123);
+
+        // The alias helper:
+        StepAliasHelper stepAliasHelper = mock(StepAliasHelper.class);
+        ControlAliasHelper aliasHelperStep1 = mock(ControlAliasHelper.class);
+        ControlAliasHelper aliasHelperStep2 = mock(ControlAliasHelper.class);
+
+        // step 1 without alias
+        when(stepAliasHelper.getAliasHelperForStep(wizard.getSteps().getStep().get(0))).thenReturn(aliasHelperStep1);
+        // step 2 as stepAlias
+        when(stepAliasHelper.getAliasHelperForStepAlias("stepAlias")).thenReturn(aliasHelperStep2);
+
+        // Step 1, controlAlias
+        when(aliasHelperStep1.findControl("controlAlias")).thenReturn(wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(0).getString());
+        // Step 2, controlAlias
+        when(aliasHelperStep2.getStep()).thenReturn(wizard.getSteps().getStep().get(0));
+        when(aliasHelperStep2.findControl("controlAlias")).thenReturn(wizard.getSteps().getStep().get(1).getQuestions().getQuestion().get(0).getLabel());
+
+        // translate
+        postProcessor.resolveAlias(wizard, stepAliasHelper);
+
+        // The next step of the condition should have been translated
+        Assert.assertNull(((ControlTriggerValue) wizard.getSteps().getStep().get(0).getConditions().getCondition().get(0).getEqual().getControlOrConstOrMetadata().get(0)).getStep());
+        Assert.assertEquals("CONTROL_123",((ControlTriggerValue) wizard.getSteps().getStep().get(0).getConditions().getCondition().get(0).getEqual().getControlOrConstOrMetadata().get(0)).getId());
+        Assert.assertEquals(123, (int) ((ControlTriggerValue) wizard.getSteps().getStep().get(0).getConditions().getCondition().get(1).getEqual().getControlOrConstOrMetadata().get(0)).getStep());
+        Assert.assertEquals("CONTROL_456",((ControlTriggerValue) wizard.getSteps().getStep().get(0).getConditions().getCondition().get(1).getEqual().getControlOrConstOrMetadata().get(0)).getId());
     }
 }
