@@ -1,11 +1,9 @@
 package nl.thedocumentwizard.spell.parser;
 
 import nl.thedocumentwizard.spell.MetadataStore;
-import nl.thedocumentwizard.wizardconfiguration.Condition;
-import nl.thedocumentwizard.wizardconfiguration.ControlValue;
-import nl.thedocumentwizard.wizardconfiguration.Step;
-import nl.thedocumentwizard.wizardconfiguration.WizardConfiguration;
+import nl.thedocumentwizard.wizardconfiguration.*;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.RadioControl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -327,5 +325,48 @@ public class PostProcessorTest {
         Assert.assertEquals("CONTROL_123",((ControlTriggerValue) wizard.getSteps().getStep().get(0).getConditions().getCondition().get(0).getEqual().getControlOrConstOrMetadata().get(0)).getId());
         Assert.assertEquals(123, (int) ((ControlTriggerValue) wizard.getSteps().getStep().get(0).getConditions().getCondition().get(1).getEqual().getControlOrConstOrMetadata().get(0)).getStep());
         Assert.assertEquals("CONTROL_456",((ControlTriggerValue) wizard.getSteps().getStep().get(0).getConditions().getCondition().get(1).getEqual().getControlOrConstOrMetadata().get(0)).getId());
+    }
+
+    @Test
+    public void resolveAlias_should_translate_control_default_value() throws Exception {
+        // The wizard
+        WizardConfiguration wizard = new WizardConfiguration();
+        wizard.setSteps(new ArrayOfSteptype());
+        wizard.getSteps().getStep().add(new Step());
+
+        // Step 1, String as controlAlias1:
+        wizard.getSteps().getStep().get(0).setQuestions(new ArrayOfWizardQuestion());
+        // Question 1: Radio
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(0).setRadio(new nl.thedocumentwizard.wizardconfiguration.RadioControl());
+        // Question 2: Multi { Radio }
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(1).setMulti(new MultiControl());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(1).getMulti().setControls(new ArrayOfChoice2());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(1).getMulti().getControls().getTextOrNumberOrAttachment().add(new nl.thedocumentwizard.wizardconfiguration.RadioControl());
+
+        // Question 3: String as strControl
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(2).setString(new StringControl());
+
+        // radio "" = strControl
+        ((nl.thedocumentwizard.wizardconfiguration.RadioControl) wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(0).getRadio()).setAliasDefaultValue("strControl");
+        ((nl.thedocumentwizard.wizardconfiguration.RadioControl) wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(1).getMulti().getControls().getTextOrNumberOrAttachment().get(0)).setAliasDefaultValue("strControl");
+        // string "" as strControl
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(2).getString().setId("CONTROL_123");
+
+        // The alias helper:
+        StepAliasHelper stepAliasHelper = mock(StepAliasHelper.class);
+        ControlAliasHelper currentStepAliasHelper = mock(ControlAliasHelper.class);
+
+        when(stepAliasHelper.getAliasHelperForStep(wizard.getSteps().getStep().get(0))).thenReturn(currentStepAliasHelper);
+        when(currentStepAliasHelper.findControl("strControl")).thenReturn(wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(2).getString());
+
+        // translate
+        postProcessor.resolveAlias(wizard, stepAliasHelper);
+
+        // The default value should have been translated
+        Assert.assertEquals("CONTROL_123", wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(0).getRadio().getDefaultValue());
+        Assert.assertEquals("CONTROL_123", wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(1).getMulti().getControls().getTextOrNumberOrAttachment().get(0).getDefaultValue());
     }
 }

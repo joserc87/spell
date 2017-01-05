@@ -1,11 +1,9 @@
 package nl.thedocumentwizard.spell.parser;
 
 import nl.thedocumentwizard.spell.MetadataStore;
-import nl.thedocumentwizard.wizardconfiguration.Condition;
-import nl.thedocumentwizard.wizardconfiguration.ControlValue;
-import nl.thedocumentwizard.wizardconfiguration.Step;
-import nl.thedocumentwizard.wizardconfiguration.WizardConfiguration;
+import nl.thedocumentwizard.wizardconfiguration.*;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.RadioControl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -275,6 +273,7 @@ public class PostProcessor {
     public void resolveAlias(WizardConfiguration wizard, StepAliasHelper aliasHelper) {
         if (wizard.getSteps() != null) {
             for (Steptype step : wizard.getSteps().getStep()) {
+                ControlAliasHelper currentStepAliasHelper = aliasHelper.getAliasHelperForStep(step);
                 String nextStepAlias = step instanceof Step ? ((Step) step).getNextStepAlias() : null;
                 // Translate next step:
                 if (nextStepAlias != null) {
@@ -301,6 +300,13 @@ public class PostProcessor {
                                         ": Step '" + conditionalNextStepAlias + "' does not exist.");
                             }
                         }
+                    }
+                }
+                // Translate control default value
+                if (step.getQuestions() != null) {
+                    for (ArrayOfWizardQuestion.Question question : step.getQuestions().getQuestion()) {
+                        this.resolveAliasDefaultValue(question.getRadio(), currentStepAliasHelper);
+                        this.resolveAliasDefaultValue(question.getMulti(), currentStepAliasHelper);
                     }
                 }
                 // Translate ControlTriggerValue:
@@ -337,7 +343,6 @@ public class PostProcessor {
                         findControlValues(ar.getRegEx()             , controlValues);
                     }
                 }
-                ControlAliasHelper currentStepAliasHelper = aliasHelper.getAliasHelperForStep(step);
                 for (ControlValue val : controlValues) {
                     ControlAliasHelper referencedStepAliasHelper;
                     // If STEP.CONTROL, find the step
@@ -365,6 +370,41 @@ public class PostProcessor {
                 }
             }
         }
+    }
+
+    private void resolveAliasDefaultValue(AbstractControl control, ControlAliasHelper currentStepAliasHelper) {
+        if (control != null) {
+            if (control instanceof nl.thedocumentwizard.wizardconfiguration.RadioControl) {
+                nl.thedocumentwizard.wizardconfiguration.RadioControl radio = (nl.thedocumentwizard.wizardconfiguration.RadioControl) control;
+                String alias = radio.getAliasDefaultValue();
+                if (alias != null) {
+                    AbstractControl referencedControl = currentStepAliasHelper.findControl(alias);
+                    if (referencedControl != null) {
+                        radio.setDefaultValue(referencedControl.getId());
+                    } else {
+                        System.err.println("Control " + alias + " does not exist");
+                    }
+                }
+            }
+            // Recursive
+            if (control instanceof RadioControl) {
+                RadioControl radio = (RadioControl) control;
+                if (radio.getItems() != null) {
+                    for (AbstractControl subControl : radio.getItems().getTextOrCheckboxOrAttachment()) {
+                        this.resolveAliasDefaultValue(subControl, currentStepAliasHelper);
+                    }
+                }
+            }
+            if (control instanceof MultiControl) {
+                MultiControl multi = (MultiControl) control;
+                if (multi.getControls() != null) {
+                    for (AbstractControl subControl : multi.getControls().getTextOrNumberOrAttachment()) {
+                        this.resolveAliasDefaultValue(subControl, currentStepAliasHelper);
+                    }
+                }
+            }
+        }
+
     }
 
     public void findControlValues(Trigger t, List<ControlValue> values) {

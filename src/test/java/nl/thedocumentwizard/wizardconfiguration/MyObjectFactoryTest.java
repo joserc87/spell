@@ -38,4 +38,9 @@ public class MyObjectFactoryTest {
     public void testCreateControlTriggerValue() throws Exception {
         Assert.assertEquals(ControlValue.class, factory.createControlTriggerValue().getClass());
     }
+
+    @Test
+    public void testCreateRadioControl() throws Exception {
+        Assert.assertEquals(RadioControl.class, factory.createRadioControl().getClass());
+    }
 }

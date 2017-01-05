@@ -1,6 +1,7 @@
 package nl.thedocumentwizard.wizardconfiguration;
 
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.RadioControl;
 
 /**
  * Created by jose on 05/12/2016.
@@ -177,7 +178,7 @@ public class MyObjectFactory extends ObjectFactory {
 
     @Override
     public RadioControl createRadioControl() {
-        return super.createRadioControl();
+        return new nl.thedocumentwizard.wizardconfiguration.RadioControl();
     }
 
     @Override

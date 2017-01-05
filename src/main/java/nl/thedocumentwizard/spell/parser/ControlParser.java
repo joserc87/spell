@@ -1,6 +1,8 @@
 package nl.thedocumentwizard.spell.parser;
 
+import nl.thedocumentwizard.wizardconfiguration.*;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.RadioControl;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -41,8 +43,20 @@ public class ControlParser {
                 if (defaultValue.literal() != null) {
                     String stringValue = helper.getString(defaultValue.literal().STRING());
                     value = stringValue;
-                } else {
+                } else if (defaultValue.METADATA() != null) {
                     metadataName = helper.getMetadataName(defaultValue.METADATA());
+                } else if (defaultValue.NAME() != null) {
+                    // Default value is a name. e.g:
+                    // radio "" = item1
+                    //   label "no" item1
+                    //   label "yes" item2
+                    if (control instanceof nl.thedocumentwizard.wizardconfiguration.RadioControl) {
+                        nl.thedocumentwizard.wizardconfiguration.RadioControl radio = (nl.thedocumentwizard.wizardconfiguration.RadioControl) control;
+                        radio.setAliasDefaultValue(defaultValue.NAME().getText());
+                    } else {
+                        // If it's not a radio, it doesn't make sense to have a name as the default value
+                        System.err.println("Unexpected default value '" + defaultValue.NAME().getText() + "' for control");
+                    }
                 }
                 if (value != null) {
                     control.setDefaultValue(value);
