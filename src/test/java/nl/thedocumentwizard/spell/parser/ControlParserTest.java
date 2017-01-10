@@ -3,6 +3,7 @@ package nl.thedocumentwizard.spell.parser;
 import jdk.nashorn.internal.ir.Terminal;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -131,6 +133,33 @@ public class ControlParserTest {
         Assert.assertEquals(StringControl.class, control.getClass());
         Assert.assertEquals("default value", control.getDefaultValue());
         Assert.assertEquals("metadataName", control.getMetadataName());
+    }
+
+    @Test
+    public void getControl_should_register_alias_and_set_id() {
+        SpellParser.QuestionContext ctx = mock(SpellParser.QuestionContext.class);
+        SpellParser.Named_string_controlContext controlContext = mock(SpellParser.Named_string_controlContext.class);
+        when(ctx.named_string_control()).thenReturn(controlContext);
+
+        SpellParser.AliasContext alias = mock(SpellParser.AliasContext.class);
+        when(controlContext.alias()).thenReturn(alias);
+
+        TerminalNode name = mockOfTerminalNode("myAlias");
+        when(alias.NAME()).thenReturn(name);
+
+        // Mock the alias helper
+        ControlAliasHelper aliasHelper = mock(ControlAliasHelper.class);
+        controlParser.setAliasHelper(aliasHelper);
+
+        // When setAbstractControl
+        AbstractControl control = controlParser.getControl(ctx);
+
+        // Then it should return a string control
+        Assert.assertEquals(StringControl.class, control.getClass());
+        Assert.assertEquals("myAlias", control.getId());
+
+        // It should have registered the control for that alias
+        verify(aliasHelper).registerControl("myAlias", control);
     }
 
     public SpellParser.String_or_metadataContext createString_or_metadataContext(TerminalNode string, TerminalNode metadata) {

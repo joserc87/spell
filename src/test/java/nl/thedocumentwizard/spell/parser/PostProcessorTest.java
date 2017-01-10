@@ -58,7 +58,9 @@ public class PostProcessorTest {
         wizard.getSteps().getStep().get(0).getQuestions().getQuestion().add(new ArrayOfWizardQuestion.Question());
 
         wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(0).setString(new StringControl());
+        // control 2 will have an alias, so the ID should be different
         wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(1).setLabel(new LabelControl());
+        wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(1).getLabel().setId("aliasLabel");
         wizard.getSteps().getStep().get(0).getQuestions().getQuestion().get(2).setRadio(new RadioControl());
 
         // Control 3 is a radio { label, multi { label, string } }
@@ -89,7 +91,7 @@ public class PostProcessorTest {
 
         // Control IDs
         Assert.assertEquals("CONTROL_1", s1Questions.get(0).getString().getId());
-        Assert.assertEquals("CONTROL_2", s1Questions.get(1).getLabel().getId());
+        Assert.assertEquals("aliasLabel", s1Questions.get(1).getLabel().getId());
         Assert.assertEquals("CONTROL_3", s1Questions.get(2).getRadio().getId());
         Assert.assertEquals("CONTROL_3_1", radio.getItems().getTextOrCheckboxOrAttachment().get(0).getId());
         Assert.assertEquals("CONTROL_3_2", radio.getItems().getTextOrCheckboxOrAttachment().get(1).getId());

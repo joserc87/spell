@@ -80,6 +80,7 @@ public class ControlParser {
             if (alias != null) {
                 String aliasName = alias.NAME().getText();
                 aliasHelper.registerControl(aliasName, control);
+                control.setId(aliasName);
             }
         } catch (NoSuchMethodException e) {
             // It's ok if the method does not exist

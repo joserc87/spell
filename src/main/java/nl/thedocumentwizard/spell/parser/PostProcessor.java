@@ -70,7 +70,11 @@ public class PostProcessor {
      */
     private void assignControlID(AbstractControl control, String id) {
         if (control != null) {
-            control.setId(id);
+            if (control.getId() == null) {
+                control.setId(id);
+            } else {
+                id = control.getId();
+            }
             // Set ids to subcontrols, recursively
             if (control instanceof RadioControl) {
                 RadioControl radio = (RadioControl) control;
