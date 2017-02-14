@@ -21,6 +21,12 @@ dependencies {
     compile group: 'org.glassfish.jaxb', name: 'txw2', version: '2.2.11'
 }
 
+test {
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}
+
 jar {
     manifest {
         attributes 'Main-Class': 'nl.thedocumentwizard.spell.Main'
