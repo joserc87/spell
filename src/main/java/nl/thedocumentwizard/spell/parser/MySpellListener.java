@@ -224,6 +224,8 @@ public class MySpellListener extends SpellBaseListener {
             name = helper.getString(ctx.named_string_control().STRING());
         } else if (ctx.named_basic_control() != null) {
             name = helper.getString(ctx.named_basic_control().STRING());
+        } else if (ctx.named_list_control() != null) {
+            name = helper.getString(ctx.named_list_control().STRING());
         } else if (ctx.named_upload_control() != null) {
             name = helper.getString(ctx.named_upload_control().STRING());
         } else if (ctx.named_container_control() != null) {
