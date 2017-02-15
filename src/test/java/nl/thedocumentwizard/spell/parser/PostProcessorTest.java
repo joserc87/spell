@@ -38,10 +38,18 @@ public class PostProcessorTest {
 
         postProcessor.assignStepIDs(wizard);
 
+        // IDs should be assigned in sequential order
         Assert.assertEquals(1, wizard.getSteps().getStep().get(0).getId());
         Assert.assertEquals(2, wizard.getSteps().getStep().get(1).getId());
         Assert.assertEquals(3, wizard.getSteps().getStep().get(2).getId());
         Assert.assertEquals(4, wizard.getSteps().getStep().get(3).getId());
+
+        // First step should have type START and last step type FINISH. The
+        // rest should not have a type.
+        Assert.assertEquals("START", wizard.getSteps().getStep().get(0).getType());
+        Assert.assertEquals("FINISH", wizard.getSteps().getStep().get(3).getType());
+        Assert.assertEquals(null, wizard.getSteps().getStep().get(1).getType());
+        Assert.assertEquals(null, wizard.getSteps().getStep().get(2).getType());
     }
 
     @Test

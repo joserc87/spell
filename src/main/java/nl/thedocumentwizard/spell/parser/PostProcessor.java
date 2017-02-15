@@ -29,6 +29,13 @@ public class PostProcessor {
                 step.setId(i);
                 i++;
             }
+            // Set START and FINISH steps
+            if (wizard.getSteps().getStep().size() > 0) {
+                wizard.getSteps().getStep().get(
+                        wizard.getSteps().getStep().size() - 1
+                        ).setType("FINISH");
+                wizard.getSteps().getStep().get(0).setType("START");
+            }
         }
     }
 
