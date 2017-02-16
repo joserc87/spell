@@ -41,8 +41,11 @@ public class ControlParser {
                 String value = null;
                 String metadataName = null;
                 if (defaultValue.literal() != null) {
-                    String stringValue = helper.getString(defaultValue.literal().STRING());
-                    value = stringValue;
+                    if (defaultValue.literal().STRING() != null) {
+                        value = helper.getString(defaultValue.literal().STRING());
+                    } else if (defaultValue.literal().NUM() != null) {
+                        value = defaultValue.literal().NUM().getText();
+                    }
                 } else if (defaultValue.METADATA() != null) {
                     metadataName = helper.getMetadataName(defaultValue.METADATA());
                 } else if (defaultValue.NAME() != null) {

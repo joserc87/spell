@@ -36,10 +36,24 @@ public class ControlParserTest {
         return ctx;
     }
 
+    public SpellParser.LiteralContext mockOfNumberLiteral(String s) {
+        SpellParser.LiteralContext ctx = mock (SpellParser.LiteralContext.class);
+        TerminalNode term = mockOfTerminalNode(s);
+        when(ctx.NUM()).thenReturn(term);
+        return ctx;
+    }
+
     public SpellParser.Default_valueContext mockOfStringDefaultValue(String s) {
         SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
         SpellParser.LiteralContext STRING = mockOfStringLiteral(s);
         when(defVal.literal()).thenReturn(STRING);
+        return defVal;
+    }
+
+    public SpellParser.Default_valueContext mockOfNumberDefaultValue(String s) {
+        SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
+        SpellParser.LiteralContext NUMBER = mockOfNumberLiteral(s);
+        when(defVal.literal()).thenReturn(NUMBER);
         return defVal;
     }
 
@@ -73,6 +87,22 @@ public class ControlParserTest {
 
         // Then
         Assert.assertEquals("default value", control.getDefaultValue());
+    }
+
+    @Test
+    public void setAbstractControl_should_set_number_default_value() throws Exception {
+        // Because context contains the default value as a literal
+        SpellParser.Named_string_controlContext ctx = mock(SpellParser.Named_string_controlContext.class);
+
+        SpellParser.Default_valueContext defVal = mockOfNumberDefaultValue("123");
+        when(ctx.default_value()).thenReturn(defVal);
+
+        // When setAbstractControl
+        NumberControl control = new NumberControl();
+        controlParser.setAbstractControl(ctx, control);
+
+        // Then
+        //Assert.assertEquals("123", control.getDefaultValue());
     }
 
     @Test
