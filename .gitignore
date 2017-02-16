@@ -21,3 +21,4 @@ gradle-app.setting
 
 # Ignore IntelliJ Idea
 .idea
+/bin/
