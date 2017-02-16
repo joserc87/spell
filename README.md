@@ -53,6 +53,9 @@ step "This is the first step":
         # rule is triggered
         goto correctAnswer
 
+    # Questions and conditions can be mixed
+    'Last question'
+
     # This is like an "else"
     when answerToLife != 42:
         $filmMetadata = "You should watch 'The Hitch Hiker's Guide to the Galaxy (1979)"
@@ -64,7 +67,7 @@ step "That was the correct answer", "Answer evaluation group" as correctAnswer:
     label "Congratulations!"
     label = $filmMetadata
     text "Suggest us a movie", minLength=50, maxLength=400 -> $otherFilms
-    goto RateStep
+    goto RateStep # Default next step
 
 step "Incorrect answer", "Answer evaluation group" as incorrectAnswer:
     label "Whoops! That was not the answer!"
@@ -92,7 +95,7 @@ step "Rate this language" as RateStep:
             label "yes, but..."
             string -> $comments
 
-    
+
     # These complex Advanced Rules would take dozens of lines in an XML:
     when languageRate == "omg":                        # OMG -> 5stars
         $rate = "☆☆☆☆☆"
@@ -126,7 +129,7 @@ step "Rate this language" as RateStep:
   be referenced with the same exact name.
 - Steps and controls can have an alias to be referenced. For example, you can
   use the alias of a step to `goto` that step (condition), or to access the
-  value of a control in a previous step: 
+  value of a control in a previous step:
 
   ```python
   step "Step 1" as previousStep:
@@ -149,14 +152,19 @@ step "Rate this language" as RateStep:
 
 ### TODO:
 
-- [X] Parse document types XML
-- [X] Implement lists items, and subcontrols for radios and multis
-- [ ] Implement triggers for conditions and advanced rules.
-- [ ] Implement goto S and $m = "Val", not only under "when" but also inside
+- [X] Implement triggers for conditions and advanced rules.
+- [X] Implement goto S and $m = "Val", not only under "when" but also inside
   step, as default next step and allways triggered advanced rules
-- [ ] Set IDs for Questions and controls automatically
-- [ ] Use the alias to link steps and controls, and set the ID based on the
+- [X] Set IDs for Questions and controls automatically
+- [X] Use the alias to link steps and controls, and set the ID based on the
   alias
+- [ ] **BUG** Sometimes the default next step does not work??? It sets the
+  nextStepID as its own ID when there is no goto.
+- [ ] Implement generic control attributes (number format, max text lengths,
+  etc).
+- [ ] Implement XPath input data in the list control.
+- [ ] Validate the type of the default values depending on the type of the
+  control.
 
 ### Ideas:
 
