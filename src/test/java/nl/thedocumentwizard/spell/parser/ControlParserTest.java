@@ -1,6 +1,5 @@
 package nl.thedocumentwizard.spell.parser;
 
-import jdk.nashorn.internal.ir.Terminal;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
@@ -30,16 +29,25 @@ public class ControlParserTest {
     }
 
     public SpellParser.LiteralContext mockOfStringLiteral(String s) {
-        SpellParser.LiteralContext ctx = mock (SpellParser.LiteralContext.class);
+        SpellParser.LiteralContext ctx = mock(SpellParser.LiteralContext.class);
         TerminalNode term = mockOfTerminalNode(s);
         when(ctx.STRING()).thenReturn(term);
         return ctx;
     }
 
     public SpellParser.LiteralContext mockOfNumberLiteral(String s) {
-        SpellParser.LiteralContext ctx = mock (SpellParser.LiteralContext.class);
+        SpellParser.LiteralContext ctx = mock(SpellParser.LiteralContext.class);
         TerminalNode term = mockOfTerminalNode(s);
         when(ctx.NUM()).thenReturn(term);
+        return ctx;
+    }
+
+    public SpellParser.LiteralContext mockOfTrueBooleanLiteral(String s) {
+        SpellParser.LiteralContext ctx = mock(SpellParser.LiteralContext.class);
+        SpellParser.BoolContext boolContext = mock(SpellParser.BoolContext.class); 
+        TerminalNode term = mockOfTerminalNode(s);
+        when(boolContext.TRUE()).thenReturn(term);
+        when(ctx.bool()).thenReturn(boolContext);
         return ctx;
     }
 
@@ -54,6 +62,13 @@ public class ControlParserTest {
         SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
         SpellParser.LiteralContext NUMBER = mockOfNumberLiteral(s);
         when(defVal.literal()).thenReturn(NUMBER);
+        return defVal;
+    }
+
+    public SpellParser.Default_valueContext mockOfTrueBooleanDefaultValue(String s) {
+        SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
+        SpellParser.LiteralContext Boolean = mockOfTrueBooleanLiteral(s);
+        when(defVal.literal()).thenReturn(Boolean);
         return defVal;
     }
 
@@ -102,7 +117,23 @@ public class ControlParserTest {
         controlParser.setAbstractControl(ctx, control);
 
         // Then
-        //Assert.assertEquals("123", control.getDefaultValue());
+        Assert.assertEquals("123", control.getDefaultValue());
+    }
+
+    @Test
+    public void setAbstractControl_should_set_boolean_default_value() throws Exception {
+        // Because context contains the default value as a literal
+        SpellParser.Named_string_controlContext ctx = mock(SpellParser.Named_string_controlContext.class);
+
+        SpellParser.Default_valueContext defVal = mockOfTrueBooleanDefaultValue("selected");
+        when(ctx.default_value()).thenReturn(defVal);
+
+        // When setAbstractControl
+        CheckboxControl control = new CheckboxControl();
+        controlParser.setAbstractControl(ctx, control);
+
+        // Then
+        Assert.assertEquals("True", control.getDefaultValue());
     }
 
     @Test
