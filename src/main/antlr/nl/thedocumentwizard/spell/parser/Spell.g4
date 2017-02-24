@@ -315,6 +315,28 @@ comp_op
 // LEXER RULES: //
 //////////////////
 
+
+// and lexer rule
+ INCLUDE
+   : 'include' (SPACES)? f=STRING {
+     /*
+     String name = f.getText();
+     name = name.substring(1,name.length()-1);
+     try {
+      // save current lexer's state
+       SaveStruct ss = new SaveStruct(input);
+       includes.push(ss);
+
+      // switch on new input stream
+       setCharStream(new ANTLRFileStream(name));
+       reset();
+
+     } catch(Exception fnf) { throw new Error("Cannot open file " + name); }
+     */
+     skip();
+   }
+   ;
+
 // From python:
 // https://github.com/antlr/grammars-v4/blob/master/python3/Python3.g4
 
