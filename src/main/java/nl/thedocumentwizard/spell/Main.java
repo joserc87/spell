@@ -149,7 +149,7 @@ public class Main {
         writeWizard(wizard);
     }
 
-    public boolean parseArgs(String args[]) {
+    public boolean parseArgs(String args[]) throws IllegalArgumentException {
         File inputFile = null;
         File outputFile = null;
 
@@ -174,42 +174,44 @@ public class Main {
                 if (i < args.length) {
                     outputFile = new File(args[i]);
                 } else {
-                    System.err.println("Expected ouput file after option '" + arg + "'");
-                    return false;
+                    throw new IllegalArgumentException("Expected ouput file after option '" + arg + "'");
                 }
             } else if (arg.equals("-document-type")) {
                 i++;
                 if (i < args.length) {
                     documentTypeName = args[i];
                 } else {
-                    System.err.println("Expected document type name after option '" + arg + "'");
-                    return false;
+                    throw new IllegalArgumentException("Expected document type name after option '" + arg + "'");
                 }
             } else if (arg.equals("-document-types-xml")) {
                 i++;
                 if (i < args.length) {
                     documentTypeFile = new File(args[i]);
                 } else {
-                    System.err.println("Expected document type file XML after option '" + arg + "'");
-                    return false;
+                    throw new IllegalArgumentException("Expected document type file XML after option '" + arg + "'");
                 }
-            } else if (inputFile == null) {
+            } else if (inputFile == null && arg.charAt(0) != '-') {
+                // If it's not an option and the input file has not been specified yet
                 inputFile = new File(arg);
             } else {
                 unknownArgs.add(arg);
             }
         }
+        // If there are unknown arguemnts, throw an excepiton
         if (unknownArgs.size() > 0) {
-            for (String s : unknownArgs) {
-                System.err.println("Uknown argument '" + s + "'");
-                return false;
+            String arg = unknownArgs.get(0);
+            String message = null;
+            if (arg.charAt(0) == '-') {
+                message = "Unknown option " + unknownArgs.get(0);
+            } else {
+                message = "Too many arguments. Unexpected argument '" + unknownArgs.get(0) + "'";
             }
+            throw new IllegalArgumentException(message);
         }
 
         // Make sure that, at least, the input file is given
         if (inputFile == null) {
-            System.err.println("Input file not specified.");
-            return false;
+            throw new IllegalArgumentException("Input file not specified.");
         } else {
             try {
                 this.inputStream = new FileInputStream(inputFile);
@@ -270,13 +272,19 @@ public class Main {
     }
 
     public static void main(String args[]) {
-
         Main program = new Main();
 
-        if (!program.parseArgs(args)) {
-            //program.printUsage();
-        } else {
-            program.run();
+        try {
+            if (program.parseArgs(args)) {
+                program.run();
+            }
+        } catch (IllegalArgumentException e) {
+            // The user entered some illegal command line arguments
+            // Show the message
+            System.err.println(e.getMessage() + "\n");
+            // Show the usage
+            program.printUsage();
+
         }
     }
 }
