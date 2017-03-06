@@ -66,7 +66,6 @@ public class MySpellListener extends SpellBaseListener {
         // Alias:
         if (ctx.alias() != null) {
             String alias = ctx.alias().NAME().getText();
-            step.setNextStepAlias(alias);
             aliasHelper.registerStep(alias, step);
         } else {
             aliasHelper.registerStep(step);

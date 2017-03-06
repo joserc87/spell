@@ -240,6 +240,33 @@ public class PostProcessorTest {
     }
 
     @Test
+    public void resolveAlias_should_leave_default_next_step_to_null_by_default() throws Exception {
+        // The wizard
+        WizardConfiguration wizard = new WizardConfiguration();
+        wizard.setSteps(new ArrayOfSteptype());
+        wizard.getSteps().getStep().add(new Step());
+        wizard.getSteps().getStep().add(new Step());
+
+        // Step 0: goto stepAlias
+        ((Step)wizard.getSteps().getStep().get(0)).setNextStepAlias("stepAlias");
+        // Step 1 with id 123
+        wizard.getSteps().getStep().get(1).setId(123);
+
+        // The alias helper:
+        StepAliasHelper stepAliasHelper = mock(StepAliasHelper.class);
+        ControlAliasHelper referencedAliasHelper = mock(ControlAliasHelper.class);
+
+        when(stepAliasHelper.getAliasHelperForStepAlias("stepAlias")).thenReturn(referencedAliasHelper);
+        when(referencedAliasHelper.getStep()).thenReturn(wizard.getSteps().getStep().get(1));
+
+        // translate
+        postProcessor.resolveAlias(wizard, stepAliasHelper);
+
+        // The next step should have been translated
+        Assert.assertEquals(null, wizard.getSteps().getStep().get(1).getNextStepID());
+    }
+
+    @Test
     public void resolveAlias_should_translate_condition_next_step() throws Exception {
         // The wizard
         WizardConfiguration wizard = new WizardConfiguration();
