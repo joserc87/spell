@@ -50,6 +50,7 @@ public class Main {
                 "Usage: java -jar spell.jar <inputFile.spl> [options...]\n\n" +
                 "where options include:\n" +
                 "    -h[elp]        Displays this help message\n" +
+                "    -v[ersion]     Displays the version string\n" +
                 "    -o[utput] <output file>\n" +
                 "                   Output the document type to a file\n" +
                 "    -pretty-print  Beautify the output XML\n" +
@@ -59,6 +60,14 @@ public class Main {
                 "                   The name of the document type to use.\n"
                 ////////////////////////////////////////////////////////////////////////////
         );
+    }
+
+    public void printVersion() {
+        String version = getClass().getPackage().getImplementationVersion();
+        if (version == null) {
+            version = "DEVELOPMENT";
+        }
+        System.out.println(version);
     }
 
     public WizardConfiguration parseWizard() {
@@ -155,6 +164,11 @@ public class Main {
 
             if (arg.equals("-h") || arg.equals("-help")) {
                 // -h or -help will show usage
+                this.printUsage();
+                return false;
+            } else if (arg.equals("-v") || arg.equals("-version")) {
+                // -v or -version will show the version string
+                this.printVersion();
                 return false;
             } else if (arg.equals("-pretty-print")) {
                 this.prettyPrint = true;
@@ -263,7 +277,7 @@ public class Main {
         Main program = new Main();
 
         if (!program.parseArgs(args)) {
-            program.printUsage();
+            //program.printUsage();
         } else {
             program.run();
         }
