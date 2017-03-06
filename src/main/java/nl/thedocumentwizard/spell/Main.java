@@ -46,19 +46,16 @@ public class Main {
 
     public void printUsage() {
         System.out.println(
-                ////////////////////////////////////////////////////////////////////////////
+                ////////////////////////////////////////////////////////////////////////////////
                 "Usage: java -jar spell.jar <inputFile.spl> [options...]\n\n" +
                 "where options include:\n" +
-                "    -h[elp]        Displays this help message\n" +
-                "    -v[ersion]     Displays the version string\n" +
-                "    -o[utput] <output file>\n" +
-                "                   Output the document type to a file\n" +
-                "    -pretty-print  Beautify the output XML\n" +
-                "    -document-types-xml <documentType.xml>\n" +
-                "                   Uses the document type xml.\n" +
-                "    -document-type <documentTypeName>\n" +
-                "                   The name of the document type to use.\n"
-                ////////////////////////////////////////////////////////////////////////////
+                "    -h[elp]                            displays this help message\n" +
+                "    -v[ersion]                         displays the version string\n" +
+                "    -o[utput] <output_file>            output the document type to a file\n" +
+                "    -pretty-print                      beautify the output XML\n" +
+                "    -document-types-xml <doctypes.xml> uses the document types xml.\n" +
+                "    -document-type <documentTypeName>  the name of the document type to use.\n"
+                ////////////////////////////////////////////////////////////////////////////////
         );
     }
 
