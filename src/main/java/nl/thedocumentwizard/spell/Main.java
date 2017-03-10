@@ -211,7 +211,7 @@ public class Main {
 
         // Make sure that, at least, the input file is given
         if (inputFile == null) {
-            throw new IllegalArgumentException("Input file not specified.");
+            this.inputStream = System.in;
         } else {
             try {
                 this.inputStream = new FileInputStream(inputFile);
