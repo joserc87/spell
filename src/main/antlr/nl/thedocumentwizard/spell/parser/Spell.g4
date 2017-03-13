@@ -147,21 +147,21 @@ named_string_control
 
 // Label, String, Email, Text, Date, Number or Checkbox
 named_basic_control
-  : basic_control_type STRING? default_value? ctrl_metadata? alias? NEWLINE
+  : basic_control_type control_attribute_list? STRING? default_value? ctrl_metadata? alias? NEWLINE
   ;
 unnamed_basic_control
-  : basic_control_type default_value? ctrl_metadata? alias? NEWLINE
+  : basic_control_type control_attribute_list? default_value? ctrl_metadata? alias? NEWLINE
   ;
 
 // List
 named_list_control
-  : LIST_TYPE STRING? default_value? ctrl_metadata? alias? COLON NEWLINE
+  : LIST_TYPE control_attribute_list? STRING? default_value? ctrl_metadata? alias? COLON NEWLINE
     INDENT
       (list_item)+
     DEDENT
   ;
 unnamed_list_control
-  : LIST_TYPE default_value? ctrl_metadata? alias? COLON NEWLINE
+  : LIST_TYPE control_attribute_list? default_value? ctrl_metadata? alias? COLON NEWLINE
     INDENT
       (list_item)+
     DEDENT
@@ -173,21 +173,21 @@ list_item
 
 // Image, File
 named_upload_control
-  : upload_control_type STRING? default_value? ctrl_metadata? alias? NEWLINE
+  : upload_control_type control_attribute_list? STRING? default_value? ctrl_metadata? alias? NEWLINE
   ;
 unnamed_upload_control
-  : upload_control_type default_value? ctrl_metadata? alias? NEWLINE
+  : upload_control_type control_attribute_list? default_value? ctrl_metadata? alias? NEWLINE
   ;
 
 // Radio, Multi
 named_container_control
-  : container_control_type STRING? default_value? ctrl_metadata? alias? COLON NEWLINE
+  : container_control_type control_attribute_list? STRING? default_value? ctrl_metadata? alias? COLON NEWLINE
     INDENT
       sub_control+
     DEDENT
   ;
 unnamed_container_control
-  : container_control_type default_value? ctrl_metadata? alias? COLON NEWLINE
+  : container_control_type control_attribute_list? default_value? ctrl_metadata? alias? COLON NEWLINE
     INDENT
       sub_control+
     DEDENT
@@ -198,6 +198,15 @@ sub_control
   | unnamed_list_control
   | unnamed_upload_control
   | unnamed_container_control // Radio or Multi
+  ;
+
+control_attribute_list
+  : '(' ')'
+  | '(' control_attribute ( ',' control_attribute )* ')'
+  ;
+
+control_attribute
+  : NAME EQUAL literal
   ;
 
 string_or_metadata

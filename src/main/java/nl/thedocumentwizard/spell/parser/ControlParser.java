@@ -5,6 +5,7 @@ import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.RadioControl;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Parses ANTLR controls into WizardControls
@@ -28,8 +29,73 @@ public class ControlParser {
     }
 
     /**
+     * Retrieves the setter method name for an attribute.
+     *
+     * @param attributeName The attribute, e.g. maxLength
+     * @return The name of the setter method. E.g. setMaxLength
+     */
+    private String getSetterMethodName(String attributeName) {
+        return "set" + attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1);
+    }
+
+    /**
+     * Executes a setter (with one argument), where the argument can be any type, String, Integer or Boolean.
+     *
+     * @param methodName The name of the setter
+     * @param obj The object to call the setter on
+     * @param value The new value for the object. If this is a number, both
+     * Float and Integer setters will be tried.
+     * @return True if the method was found, or false otherwise
+     */
+    private boolean invokeSetter(String methodName, Object obj, Object value) throws IllegalAccessException, InvocationTargetException {
+        // Try the guessed type
+        try {
+            Method setAttribute = obj.getClass().getMethod(methodName, value.getClass());
+            setAttribute.invoke(obj, value);
+            return true;
+        } catch (NoSuchMethodException e) {
+        }
+        // For numbers, check int, float and double:
+        if (value instanceof Number) {
+            Number num = (Number)value;
+            // Integer
+            try {
+                obj.getClass().getMethod(methodName, Integer.class).invoke(obj, num.intValue());
+                return true;
+            } catch (NoSuchMethodException e) { }
+            // Float
+            try {
+                obj.getClass().getMethod(methodName, Float.class).invoke(obj, num.floatValue());
+                return true;
+            } catch (NoSuchMethodException e) { }
+            // Double
+            try {
+                obj.getClass().getMethod(methodName, Double.class).invoke(obj, num.doubleValue());
+                return true;
+            } catch (NoSuchMethodException e) { }
+            // Short
+            try {
+                obj.getClass().getMethod(methodName, Short.class).invoke(obj, num.shortValue());
+                return true;
+            } catch (NoSuchMethodException e) { }
+            // Long
+            try {
+                obj.getClass().getMethod(methodName, Long.class).invoke(obj, num.longValue());
+                return true;
+            } catch (NoSuchMethodException e) { }
+            // Byte
+            try {
+                obj.getClass().getMethod(methodName, Byte.class).invoke(obj, num.byteValue());
+                return true;
+            } catch (NoSuchMethodException e) { }
+
+        }
+        return false;
+    }
+
+    /**
      * Sets the common attributes for all controls using reflection:
-     * 
+     *
      * @param ctx The context object. It contains the default value / default value metadata, the metadata, etc.
      * @param control The abstract control to set
      */
@@ -94,12 +160,36 @@ public class ControlParser {
                 aliasHelper.registerControl(aliasName, control);
                 control.setId(aliasName);
             }
+            // Custom attributes
+            SpellParser.Control_attribute_listContext attributes = (SpellParser.Control_attribute_listContext) ctx.getClass().getMethod("control_attribute_list").invoke(ctx);
+            if (attributes != null && attributes.control_attribute() != null) {
+                for (SpellParser.Control_attributeContext attribute : attributes.control_attribute()) {
+                    String attributeKey = attribute.NAME().getText();
+                    Object attributeValue = null;
+                    String methodName = getSetterMethodName(attributeKey);
+                    if (attribute.literal().STRING() != null) {
+                        // The value is a string
+                        attributeValue = helper.getString(attribute.literal().STRING());
+                    } else if (attribute.literal().NUM() != null) {
+                        // The value is a number
+                        attributeValue = Float.parseFloat(attribute.literal().NUM().getText());
+                    } else if (attribute.literal().bool() != null) {
+                        // The value is a boolean (true/false or selected/unselected)
+                        attributeValue = attribute.literal().bool().TRUE() != null;
+                    }
+                    if (!invokeSetter(methodName, control, attributeValue)) {
+                        System.err.println("Error: no attribute " + attributeKey +
+                                " with type " + attributeValue.getClass() +
+                                " found for control " + control.getClass());
+                    }
+                }
+            }
         } catch (NoSuchMethodException e) {
             // It's ok if the method does not exist
         } catch (InvocationTargetException e) {
-            // It's ok if the method does not exist
+            System.err.println(e);
         } catch (IllegalAccessException e) {
-            // It's ok if the method does not exist
+            System.err.println(e);
         }
     }
 

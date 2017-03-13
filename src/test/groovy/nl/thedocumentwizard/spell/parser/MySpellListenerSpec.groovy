@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import java.nio.charset.StandardCharsets;
 
 class MySpellListenerSpec extends spock.lang.Specification {
+    // Include
 
     def 'parse spell from string with include sentence'() {
         given: 'a spell with 2 steps'
@@ -69,6 +70,7 @@ class MySpellListenerSpec extends spock.lang.Specification {
             wizard.steps.step[1].name == 'step 2'
     }
 
+    // Alias
     def 'step alias does not change nextStepAlias'() {
         given: 'a spell with 2 steps'
             def spell = "\n" +
@@ -104,5 +106,39 @@ class MySpellListenerSpec extends spock.lang.Specification {
             wizard.steps.step[0].nextStepID == 2
         and: 'the first step should have an alias, but no next step'
             wizard.steps.step[1].nextStepID == null
+    }
+
+    // Attributes
+    def 'parse spell with control attributes'() {
+        given: 'a spell with 2 steps'
+            def spell = "\n" +
+                "\nstep 'My step':" +
+                "\n    number(minValue=1, trimTrailedZeros=true, outputFormat='asdf') 'question'" +
+                "\nstep 'another step':" +
+                "\n    'another question'";
+            def inputStream = new ByteArrayInputStream(spell.getBytes(StandardCharsets.UTF_8));
+        and: 'a spell listener'
+            def helper = new ParsingHelper();
+            def aliasHelper = new StepAliasHelper();
+            def factory = new MyObjectFactory();
+            def controlParser = new ControlParser(factory, helper);
+            def whenParser = new WhenParser(factory, helper);
+            def listener = new MySpellListener(factory, controlParser, whenParser, helper, aliasHelper);
+        and: 'a tokenized input stream'
+            def lexer = new SpellLexer(new ANTLRInputStream(inputStream));
+            def tokens = new CommonTokenStream(lexer);
+            def parser = new SpellParser(tokens);
+            def wizardSentenceContext = parser.wizard();
+        when: 'we walk through the tokens, notifying the listener'
+            (new ParseTreeWalker()).walk(listener, wizardSentenceContext);
+            def wizard = listener.getWizard()
+        then: 'the first step should have a number control'
+            wizard.steps.step[0].questions.question[0].number != null
+        and: 'the control minimumValue should be 1'
+            wizard.steps.step[0].questions.question[0].number.minValue == 1
+        and: 'the control should trim the trailed zeros'
+            wizard.steps.step[0].questions.question[0].number.trimTrailedZeros == true
+        and: 'the control should format the output'
+            wizard.steps.step[0].questions.question[0].number.outputFormat == 'asdf'
     }
 }
