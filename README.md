@@ -1,5 +1,7 @@
 # SPELL Language Compiler
 
+![build](https://travis-ci.org/joserc87/spell.svg?branch=master)
+
 A compiler to generate wizard configuration XMLs from the much simpler SPELL
 langauge, written in Java. It uses [antrl](http://www.antlr.org) to parse the
 input file and JAXB to generate the output XMLs and to parse the documenttype
