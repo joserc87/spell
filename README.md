@@ -9,17 +9,34 @@ xml documents.
 
 To build the project you need gradle installed, as well as the JDK:
 
-```
- $ gradle build jar
-```
+- To run the test, invoke:
+  
+  ```
+   $ gradle test
+  ```
+  
+- To compile the project and generate scripts to run the program:
+  
+  ```
+   $ gradle installDist
+  ```
+  
+  The binaries and scripst will be created in `./build/install/spell`.
+  
+- Finally, to generate a Zip or Tar package, run:
+  
+  ```
+   $ gradle distZip
+   or
+   $ gradle distTar
+  ```
+  
+  This will create a package in `./build/distributions/spell-VERSION.zip` or
+  `./build/distributions/spell-VERSION.tar` where _VERSION_ depends on your
+  current version version.
 
-Or open the IntelliJ Idea  and build the project manually.
+- It should be possible to build the project using _IntelliJ Idea_ too.
 
-To run the test, invoke:
-
-```
- $ gradle test
-```
 
 ## Syntax:
 
@@ -74,12 +91,7 @@ step "Incorrect answer", "Answer evaluation group" as incorrectAnswer:
     label "" = $filmMetadata
     goto RateStep
 
-# The wizards can be modularized, importing steps from other files
-import myStep
-
 step "Rate this language" as RateStep:
-    # You can import also files to compose steps with reusable controls
-    import myReusableControls
 
     # Default value can be the actual value (int/string) or an alias
     list "How do you like this language?" = "like" -> $metadata as languageRate:
@@ -145,38 +157,41 @@ step "Rate this language" as RateStep:
   ```
 - The next step will be the one writen inmediately after, by default. To go to
   another step, use the `goto` (without a condition).
-- A file imported outside any step shoud contain one or more steps. A file
-  imported within a step (i.e. indented inside the step definition), should
-  contain only controls, advanced rules or conditions, and should not contain
-  other steps.
+- The spell compiler does not support any kind of preprocessing at this stage,
+  but things like including files, variable data and loops can be achieved
+  using templating languages like [Jinja](http://jinja.pocoo.org/docs/2.9/).
 
 ### TODO:
 
-- [X] Implement triggers for conditions and advanced rules.
-- [X] Implement goto S and $m = "Val", not only under "when" but also inside
-  step, as default next step and allways triggered advanced rules
-- [X] Set IDs for Questions and controls automatically
-- [X] Use the alias to link steps and controls, and set the ID based on the
-  alias
-- [ ] **BUG** Sometimes the default next step does not work??? It sets the
+- [x] **BUG** Sometimes the default next step does not work??? It sets the
   nextStepID as its own ID when there is no goto.
-- [ ] Implement generic control attributes (number format, max text lengths,
+- [x] Implement generic control attributes (number format, max text lengths,
   etc).
 - [ ] Implement XPath input data in the list control.
 - [ ] Validate the type of the default values depending on the type of the
   control.
-
-### Ideas:
-
-- Configuration files where we set the default attributes of some controls (e.g. number and date formatting)
-- Macros for Controls:
+- [ ] Add a configuration statement to set the wizard name.
+- [ ] Add default attributes for controls in that configuration statement. E.g.:
+  
+  ```python
+  number(allowDecimals=true, decimalPrecision=3, step=0.2, decimalSeparator=".")
+  date(format="MMMM dd, yyyy")
   ```
-  def int:
-    number allowDecimals=false, step=1
 
-  def float2pos:
-    number allowDecimals=true, decimalPrecision=2, step="0.1", decimalSeparator=DOT
+  More advanced macros can be achieved with the preprocessor (templating
+  language):
 
-  def myDate:
-    date format="xxx"
+  ```python
+  # Define custom controls with macros:
+  {% macro int() -%}
+      number(allowDecimals=false, step=5)
+  {%- endmacro %}
+  {% macro float(precision=2) -%}
+      number(allowDecimals=true, step=0.1, decimalPrecision={{ precision }})
+  {%- endmacro %}
+
+  # Later in the spell, we use those types:
+
+  {{ int() }} 'my integer control'
+  {{ float(7) }} 'my float control'
   ```
