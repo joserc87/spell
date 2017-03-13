@@ -1,6 +1,7 @@
 package nl.thedocumentwizard.spell.parser;
 
 import nl.thedocumentwizard.wizardconfiguration.MyObjectFactory;
+import nl.thedocumentwizard.wizardconfiguration.jaxb.Separator;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -113,7 +114,7 @@ class MySpellListenerSpec extends spock.lang.Specification {
         given: 'a spell with 2 steps'
             def spell = "\n" +
                 "\nstep 'My step':" +
-                "\n    number(minValue=1, trimTrailedZeros=true, outputFormat='asdf') 'question'" +
+                "\n    number(minValue=1, trimTrailedZeros=true, outputFormat='asdf', decimalSeparator=',') 'question'" +
                 "\nstep 'another step':" +
                 "\n    'another question'";
             def inputStream = new ByteArrayInputStream(spell.getBytes(StandardCharsets.UTF_8));
@@ -140,5 +141,7 @@ class MySpellListenerSpec extends spock.lang.Specification {
             wizard.steps.step[0].questions.question[0].number.trimTrailedZeros == true
         and: 'the control should format the output'
             wizard.steps.step[0].questions.question[0].number.outputFormat == 'asdf'
+        and: 'the decimal separator should be a comma'
+            wizard.steps.step[0].questions.question[0].number.decimalSeparator == Separator.COMMA
     }
 }

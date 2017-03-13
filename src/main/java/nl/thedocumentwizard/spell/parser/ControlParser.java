@@ -39,6 +39,29 @@ public class ControlParser {
     }
 
     /**
+     * Converts a string value into it's enum representation, depending on the
+     * attribute.
+     *
+     * The enums handled by this method are.
+     *
+     * - decimalSeparator in NumberControl
+     *
+     * @param attribute The name of the attribute.
+     * @param value The string with the enum value (possibly)
+     * @return True if the exception was handled, or false otherwise
+     */
+    private Object convertEnum(String attribute, Object val) {
+        if (attribute.equals("decimalSeparator")) {
+            if (val.equals(",")) {
+                return Separator.COMMA;
+            } else if (val.equals(".")) {
+                return Separator.DOT;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Executes a setter (with one argument), where the argument can be any type, String, Integer or Boolean.
      *
      * @param methodName The name of the setter
@@ -170,6 +193,11 @@ public class ControlParser {
                     if (attribute.literal().STRING() != null) {
                         // The value is a string
                         attributeValue = helper.getString(attribute.literal().STRING());
+                        // Check if the attribute is an enum:
+                        Object enumValue = convertEnum(attributeKey, attributeValue);
+                        if (enumValue != null) {
+                            attributeValue = enumValue;
+                        }
                     } else if (attribute.literal().NUM() != null) {
                         // The value is a number
                         attributeValue = Float.parseFloat(attribute.literal().NUM().getText());

@@ -119,4 +119,26 @@ class ControlParserSpec extends spock.lang.Specification {
         and: 'the outputFormat should be "###"'
             control.outputFormat == '###'
     }
+
+    def 'setAbstractControl should set separator attribute'() throws Exception {
+        given: 'a control parser'
+            def factory = new ObjectFactory()
+            def helper = new ParsingHelper()
+            def controlParser = new ControlParser(factory, helper)
+        and: 'a basic control'
+            def ctx = mock(SpellParser.Named_basic_controlContext.class)
+            def controlAttributeList = mock(SpellParser.Control_attribute_listContext.class)
+            when(ctx.control_attribute_list()).thenReturn(controlAttributeList)
+            def attributes = new ArrayList<SpellParser.Control_attributeContext>()
+            when(controlAttributeList.control_attribute()).thenReturn(attributes)
+        and: 'an attribute decimalSeparator = ","'
+            attributes.add(createStringAttribute("decimalSeparator", "','"))
+
+        when: 'setAbstractControl is called'
+            def control = new NumberControl()
+            controlParser.setAbstractControl(ctx, control)
+
+        then: 'the decimal separator should be Separator.COMMA'
+            control.decimalSeparator == Separator.COMMA
+    }
 }
