@@ -3,6 +3,7 @@ package nl.thedocumentwizard.spell.parser;
 import nl.thedocumentwizard.wizardconfiguration.*;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.*;
 import nl.thedocumentwizard.wizardconfiguration.jaxb.RadioControl;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,6 +27,12 @@ public class ControlParser {
 
     public void setAliasHelper(ControlAliasHelper aliasHelper) {
         this.aliasHelper = aliasHelper;
+    }
+
+    private void printError(ParserRuleContext ctx, String message) {
+        System.err.println("line " + ctx.getStart().getLine() +
+                ":" + ctx.getStart().getCharPositionInLine() +
+                " " + message);
     }
 
     /**
@@ -156,7 +163,9 @@ public class ControlParser {
                         radio.setAliasDefaultValue(defaultValue.NAME().getText());
                     } else {
                         // If it's not a radio, it doesn't make sense to have a name as the default value
-                        System.err.println("Unexpected default value '" + defaultValue.NAME().getText() + "' for control");
+                        printError(defaultValue, "unexpected default value '" +
+                                defaultValue.NAME().getText() +
+                                "'. Only radio controls can have an alias as the default value.");
                     }
                 }
                 if (value != null) {
@@ -188,7 +197,7 @@ public class ControlParser {
             if (attributes != null && attributes.control_attribute() != null) {
                 for (SpellParser.Control_attributeContext attribute : attributes.control_attribute()) {
                     if (attribute.NAME() == null) {
-                        System.err.println("Error setting attribute. '" + attribute.getText() + "' is not valid.");
+                        printError(attribute, "error setting attribute. '" + attribute.getText() + "' is not valid.");
                     } else {
                         String attributeKey = attribute.NAME().getText();
                         Object attributeValue = null;
@@ -209,7 +218,8 @@ public class ControlParser {
                             attributeValue = attribute.literal().bool().TRUE() != null;
                         }
                         if (!invokeSetter(methodName, control, attributeValue)) {
-                            System.err.println("Error: no attribute " + attributeKey +
+                            printError(attribute, "error setting attribute." +
+                                    " No attribute " + attributeKey +
                                     " with type " + attributeValue.getClass() +
                                     " found for control " + control.getClass());
                         }
