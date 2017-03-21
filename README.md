@@ -168,10 +168,6 @@ step "Rate this language" as RateStep:
 
 ### TODO:
 
-- [x] **BUG** Sometimes the default next step does not work??? It sets the
-  nextStepID as its own ID when there is no goto.
-- [x] Implement generic control attributes (number format, max text lengths,
-  etc).
 - [ ] Implement XPath input data in the list control.
 - [ ] Validate the type of the default values depending on the type of the
   control.
@@ -200,3 +196,9 @@ step "Rate this language" as RateStep:
   {{ int() }} 'my integer control'
   {{ float(7) }} 'my float control'
   ```
+- [ ] Make the question name optional.
+- [ ] **BUG** The _label_ attribute in checkbox is interpreted by the lexer as
+  the _label_ control, so it creates a checkbox and a label.
+- [ ] Simplify the syntax. Types should have one common rule and the content
+  should be checked semantically instead of sintactically. Also, maybe the
+  control types should not be tokens? That would help defining new types.
