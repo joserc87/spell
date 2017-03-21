@@ -120,6 +120,28 @@ class ControlParserSpec extends spock.lang.Specification {
             control.outputFormat == '###'
     }
 
+    def 'setAbstractControl should accept label as a custom control attribute'() throws Exception {
+        given: 'a control parser'
+            def factory = new ObjectFactory()
+            def helper = new ParsingHelper()
+            def controlParser = new ControlParser(factory, helper)
+        and: 'a basic control'
+            def ctx = mock(SpellParser.Named_basic_controlContext.class)
+            def controlAttributeList = mock(SpellParser.Control_attribute_listContext.class)
+            when(ctx.control_attribute_list()).thenReturn(controlAttributeList)
+            def attributes = new ArrayList<SpellParser.Control_attributeContext>()
+            when(controlAttributeList.control_attribute()).thenReturn(attributes)
+        and: 'an attribute label = "my label"'
+            attributes.add(createStringAttribute("label", "'my label'"))
+
+        when: 'setAbstractControl is called'
+            def control = new CheckboxControl()
+            controlParser.setAbstractControl(ctx, control)
+
+        then: 'the label should be "my label"'
+            control.label == 'my label'
+    }
+
     def 'setAbstractControl should set separator attribute'() throws Exception {
         given: 'a control parser'
             def factory = new ObjectFactory()

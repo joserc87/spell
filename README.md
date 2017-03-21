@@ -197,7 +197,7 @@ step "Rate this language" as RateStep:
   {{ float(7) }} 'my float control'
   ```
 - [ ] Make the question name optional.
-- [ ] **BUG** The _label_ attribute in checkbox is interpreted by the lexer as
+- [x] **BUG** The _label_ attribute in checkbox is interpreted by the lexer as
   the _label_ control, so it creates a checkbox and a label.
 - [ ] Simplify the syntax. Types should have one common rule and the content
   should be checked semantically instead of sintactically. Also, maybe the

@@ -187,28 +187,32 @@ public class ControlParser {
             SpellParser.Control_attribute_listContext attributes = (SpellParser.Control_attribute_listContext) ctx.getClass().getMethod("control_attribute_list").invoke(ctx);
             if (attributes != null && attributes.control_attribute() != null) {
                 for (SpellParser.Control_attributeContext attribute : attributes.control_attribute()) {
-                    String attributeKey = attribute.NAME().getText();
-                    Object attributeValue = null;
-                    String methodName = getSetterMethodName(attributeKey);
-                    if (attribute.literal().STRING() != null) {
-                        // The value is a string
-                        attributeValue = helper.getString(attribute.literal().STRING());
-                        // Check if the attribute is an enum:
-                        Object enumValue = convertEnum(attributeKey, attributeValue);
-                        if (enumValue != null) {
-                            attributeValue = enumValue;
+                    if (attribute.NAME() == null) {
+                        System.err.println("Error setting attribute. '" + attribute.getText() + "' is not valid.");
+                    } else {
+                        String attributeKey = attribute.NAME().getText();
+                        Object attributeValue = null;
+                        String methodName = getSetterMethodName(attributeKey);
+                        if (attribute.literal().STRING() != null) {
+                            // The value is a string
+                            attributeValue = helper.getString(attribute.literal().STRING());
+                            // Check if the attribute is an enum:
+                            Object enumValue = convertEnum(attributeKey, attributeValue);
+                            if (enumValue != null) {
+                                attributeValue = enumValue;
+                            }
+                        } else if (attribute.literal().NUM() != null) {
+                            // The value is a number
+                            attributeValue = Float.parseFloat(attribute.literal().NUM().getText());
+                        } else if (attribute.literal().bool() != null) {
+                            // The value is a boolean (true/false or selected/unselected)
+                            attributeValue = attribute.literal().bool().TRUE() != null;
                         }
-                    } else if (attribute.literal().NUM() != null) {
-                        // The value is a number
-                        attributeValue = Float.parseFloat(attribute.literal().NUM().getText());
-                    } else if (attribute.literal().bool() != null) {
-                        // The value is a boolean (true/false or selected/unselected)
-                        attributeValue = attribute.literal().bool().TRUE() != null;
-                    }
-                    if (!invokeSetter(methodName, control, attributeValue)) {
-                        System.err.println("Error: no attribute " + attributeKey +
-                                " with type " + attributeValue.getClass() +
-                                " found for control " + control.getClass());
+                        if (!invokeSetter(methodName, control, attributeValue)) {
+                            System.err.println("Error: no attribute " + attributeKey +
+                                    " with type " + attributeValue.getClass() +
+                                    " found for control " + control.getClass());
+                        }
                     }
                 }
             }

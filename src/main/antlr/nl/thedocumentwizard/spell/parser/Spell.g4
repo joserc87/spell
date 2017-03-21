@@ -436,6 +436,10 @@ NEWLINE
 
  /// identifier   ::=  id_start id_continue*
 NAME
+ : ID
+ | '@' ID {setText(getText().substring(1));}
+ ;
+ID
  : ID_START ID_CONTINUE*
  ;
 
