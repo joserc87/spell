@@ -6,7 +6,19 @@ plugins {
 cobertura.coverageFormats = ['html', 'xml'] // coveralls plugin depends on xml format report
 
 group 'nl.thedocumentwizard.spell'
-version artifactMajorVersion + '-' + artifactBuildNumber
+
+/*
+ * Gets the version name from the latest Git tag
+ */
+def getVersionName = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+version getVersionName()
 
 apply plugin: 'java'
 apply plugin: 'groovy'
@@ -38,16 +50,6 @@ dependencies {
     compile group: 'org.glassfish.jaxb', name: 'txw2', version: '2.2.11'
     // SLF4J not used, but needed for cobertura
     testRuntime "org.slf4j:slf4j-api:1.7.10"
-}
-
-task buildnumberplusone {
-  Properties props = new Properties()
-  File propsFile = new File('gradle.properties')
-  props.load(propsFile.newDataInputStream())
-  Integer nextbuildnum = ( ((props.getProperty('artifactBuildNumber')) as BigDecimal) + 1 )
-  props.setProperty('artifactBuildNumber', nextbuildnum.toString())
-  props.store(propsFile.newWriter(), null)
-  props.load(propsFile.newDataInputStream())
 }
 
 test {
