@@ -144,4 +144,39 @@ class MySpellListenerSpec extends spock.lang.Specification {
         and: 'the decimal separator should be a comma'
             wizard.steps.step[0].questions.question[0].number.decimalSeparator == Separator.COMMA
     }
+
+    def 'parse spell with label control attribute'() {
+        given: 'a spell with 2 steps'
+            def spell = "\n" +
+                "\nstep 'My step':" +
+                "\n    checkbox(@label='my label', @selected=true) 'question'" +
+                "\nstep 'another step':" +
+                "\n    'another question'";
+            def inputStream = new ByteArrayInputStream(spell.getBytes(StandardCharsets.UTF_8));
+        and: 'a spell listener'
+            def helper = new ParsingHelper();
+            def aliasHelper = new StepAliasHelper();
+            def factory = new MyObjectFactory();
+            def controlParser = new ControlParser(factory, helper);
+            def whenParser = new WhenParser(factory, helper);
+            def listener = new MySpellListener(factory, controlParser, whenParser, helper, aliasHelper);
+        and: 'a tokenized input stream'
+            def lexer = new SpellLexer(new ANTLRInputStream(inputStream));
+            def tokens = new CommonTokenStream(lexer);
+            def parser = new SpellParser(tokens);
+            def wizardSentenceContext = parser.wizard();
+        when: 'we walk through the tokens, notifying the listener'
+            (new ParseTreeWalker()).walk(listener, wizardSentenceContext);
+            def wizard = listener.getWizard()
+        then: 'the first step should have only one question'
+            wizard.steps.step[0].questions.question.size == 1
+        and: 'the question shuld be "question"'
+            wizard.steps.step[0].questions.question[0].name == 'question'
+        and: 'that question should have a checkbox'
+            wizard.steps.step[0].questions.question[0].checkbox != null
+        and: 'the control label should be "my label"'
+            wizard.steps.step[0].questions.question[0].checkbox.label == 'my label'
+        and: 'the checkbox should be selected'
+            wizard.steps.step[0].questions.question[0].checkbox.selected == true
+    }
 }
