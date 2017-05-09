@@ -20,6 +20,7 @@
       <xs:element minOccurs="0" maxOccurs="1" name="Conditions" type="tns:ArrayOfWizardCondition" />
       <xs:element minOccurs="0" maxOccurs="1" name="AdvancedRules" type="tns:ArrayOfWizardAdvancedRule" />
       <xs:element minOccurs="0" maxOccurs="1" name="Questions" type="tns:ArrayOfWizardQuestion" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Scripts" type="tns:ArrayOfWizardScript" />
     </xs:sequence>
     <xs:attribute name="id" type="xs:int" use="required" />
     <xs:attribute name="name" type="xs:string" />
@@ -294,6 +295,7 @@
     <xs:attribute name="defaultValueMetadataID" type="xs:string" />
     <xs:attribute name="defaultValueMetadataName" type="xs:string" />
     <xs:attribute name="enabled" type="xs:boolean" />
+    <xs:attribute name="hidden" type="xs:boolean" />
   </xs:complexType>
   <xs:complexType name="ListControl">
     <xs:complexContent mixed="false">
@@ -371,9 +373,7 @@
   </xs:complexType>
   <xs:complexType name="LabelControl">
     <xs:complexContent mixed="false">
-      <xs:extension base="tns:CharacterControl">
-        <xs:attribute name="hidden" type="xs:boolean" />
-      </xs:extension>
+      <xs:extension base="tns:CharacterControl" />
     </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="StringControl">
@@ -465,4 +465,30 @@
       <xs:element minOccurs="1" maxOccurs="1" name="Multi" nillable="true" type="tns:MultiControl" />
     </xs:choice>
   </xs:complexType>
+  <xs:complexType name="ArrayOfWizardScript">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Script">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="language" type="tns:ScriptLanguage" use="required" />
+              <xs:attribute name="type" type="tns:ScriptType" use="required" />
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="ScriptLanguage">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Python" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ScriptType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="EnterStep" />
+      <xs:enumeration value="ExitStep" />
+      <xs:enumeration value="Validation" />
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>

@@ -107,6 +107,8 @@ class ControlParserSpec extends spock.lang.Specification {
             attributes.add(createBooleanAttribute("trimTrailedZeros", true))
         and: 'an attribute outputFormat = "###"'
             attributes.add(createStringAttribute("outputFormat", "'###'"))
+        and: 'an attribute hidden = "true"'
+            attributes.add(createBooleanAttribute("hidden", true))
 
         when: 'setAbstractControl is called'
             def control = new NumberControl()
@@ -118,6 +120,8 @@ class ControlParserSpec extends spock.lang.Specification {
             control.trimTrailedZeros == true
         and: 'the outputFormat should be "###"'
             control.outputFormat == '###'
+        and: 'the hidden should be true'
+            control.hidden == true
     }
 
     def 'setAbstractControl should accept label as a custom control attribute'() throws Exception {
