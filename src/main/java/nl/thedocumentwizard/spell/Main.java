@@ -32,10 +32,12 @@ import java.util.List;
  */
 public class Main {
 
-    // Arguments
+    // Options
     boolean prettyPrint;
+    boolean decompile;
     File documentTypeFile;
     String documentTypeName;
+
     // Others
     InputStream inputStream;
     OutputStream outputStream;
@@ -67,86 +69,22 @@ public class Main {
         System.out.println(version);
     }
 
-    public WizardConfiguration parseWizard() {
-        // Dependencies
-        ParsingHelper helper = new ParsingHelper();
-        aliasHelper = new StepAliasHelper();
-        ObjectFactory factory = new MyObjectFactory();
-        ControlParser controlParser = new ControlParser(factory, helper);
-        WhenParser whenParser = new WhenParser(factory, helper);
-
-        // Get our lexer
-        SpellLexer lexer = null;
-        try {
-            lexer = new SpellLexer(new ANTLRInputStream(this.inputStream));
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error reading input file.");
-            return null;
-        }
-
-        // Get a list of matched tokens
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-        // Pass the tokens to the parser
-        SpellParser parser = new SpellParser(tokens);
-
-        // Specify our entry point
-        SpellParser.WizardContext wizardSentenceContext = parser.wizard();
-
-        // Walk it and attach our listener
-        ParseTreeWalker walker = new ParseTreeWalker();
-        MySpellListener listener = new MySpellListener(factory, controlParser, whenParser, helper, aliasHelper);
-        walker.walk(listener, wizardSentenceContext);
-
-        // Marshall the wizard:
-        WizardConfiguration wizard = (WizardConfiguration) listener.getWizard();
-        return wizard;
-    }
-
-    public void postProcess(WizardConfiguration wizard) {
-        // Postprocess the wizard:
-        PostProcessor postProcessor = new PostProcessor(this.metadataStore);
-        postProcessor.assignStepIDs(wizard);
-        postProcessor.assignQuestionIDs(wizard);
-        if (this.metadataStore != null) {
-            postProcessor.assignMetadataIDs(wizard);
-        }
-        // Set document type (if specified)
-        if (this.documentType != null) {
-            wizard.setDocumentTypeName(this.documentType.getName());
-            wizard.setDocumentTypeID(this.documentType.getGuid());
-        }
-        // Link the steps and controls by alias
-        postProcessor.resolveAlias(wizard, this.aliasHelper);
-    }
-
-    public void writeWizard(WizardConfiguration wizard) {
-        String comments = null;
-        if (this.prettyPrint) {
-            SimpleDateFormat df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
-            String date = df.format(new Date());
-            String username = System.getProperty("user.name");
-            String user = username == null || username.length() <= 0 ? "" : "by " + username + " ";
-            comments = "\n  WIZARD CONFIGURATION XML." +
-                    "\n" +
-                    "\n  This file was auto-generated from SPELL" +
-                    "\n  " + user + "on " + date + "." +
-                    "\n" +
-                    "\n  Changes to this file may be overwritten.\n";
-        }
-        wizard.marshall(this.outputStream, this.prettyPrint, comments);
-        try {
-            this.outputStream.close();
-        } catch (IOException e) {
-            System.err.println("Error closing output file");
-        }
-    }
-
     public void run() {
-        WizardConfiguration wizard = parseWizard();
-        postProcess(wizard);
-        writeWizard(wizard);
+        if (this.decompile) {   // SPELL -> XML
+            // Decompile here
+            // Unmarshall XML
+            // Analize Wizard Configuration
+            // Generate a spell
+        } else {                // XML   -> SPELL
+            Compiler compiler = new Compiler(
+                    this.inputStream,
+                    this.outputStream,
+                    this.metadataStore,
+                    this.documentType,
+                    this.prettyPrint);
+            // Set options here
+            compiler.compile();
+        }
     }
 
     public boolean parseArgs(String args[]) throws IllegalArgumentException {
@@ -154,6 +92,7 @@ public class Main {
         File outputFile = null;
 
         this.prettyPrint = false;
+        this.decompile = false;
         List<String> unknownArgs = new ArrayList<>();
 
         for (int i = 0; i < args.length; i++) {
@@ -169,6 +108,8 @@ public class Main {
                 return false;
             } else if (arg.equals("-pretty-print")) {
                 this.prettyPrint = true;
+            } else if (arg.equals("-decompile")) {
+                this.decompile = true;
             } else if (arg.equals("-o") || arg.equals("-output")) {
                 i++;
                 if (i < args.length) {
