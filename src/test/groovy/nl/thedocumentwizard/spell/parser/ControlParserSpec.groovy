@@ -23,7 +23,7 @@ class ControlParserSpec extends spock.lang.Specification {
     private SpellParser.LiteralContext mockOfStringLiteral(String s) {
         def ctx = mock(SpellParser.LiteralContext.class)
         def term = mockOfTerminalNode(s)
-        when(ctx.STRING()).thenReturn(term)
+        when(ctx.STRING_LITERAL()).thenReturn(term)
         return ctx
     }
 

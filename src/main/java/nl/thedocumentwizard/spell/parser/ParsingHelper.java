@@ -14,6 +14,10 @@ public class ParsingHelper {
 
     }
 
+    private boolean isQuote(char c) {
+        return c == '"' || c == '\'';
+    }
+
     /**
      * Parses a string with single or double quotes and returns the content
      * 
@@ -22,11 +26,21 @@ public class ParsingHelper {
      * @return A string with the content
      */
     public String getString(String quotedString) {
-        assert (quotedString != null && quotedString.length() >= 2 &&
-                quotedString.charAt(0) == quotedString.charAt(quotedString.length() - 1) &&
-                (quotedString.charAt(0) == '"' || quotedString.charAt(0) == '\''));
-        return quotedString.substring(1, quotedString.length() - 1);
+        assert(quotedString != null && quotedString.length() >= 2);
+        char c = quotedString.charAt(0);
+        assert(isQuote(c));
+        if (quotedString.length() >= 6 &&
+            quotedString.charAt(1) == c && quotedString.charAt(2) == c) { // LONG_STRING
 
+            assert(quotedString.charAt(quotedString.length() - 1) == c &&
+                   quotedString.charAt(quotedString.length() - 2) == c &&
+                   quotedString.charAt(quotedString.length() - 3) == c);
+            return quotedString.substring(3, quotedString.length() - 3);
+        } else { // SHORT_STRING
+            assert(quotedString.length() >= 2 &&
+                   quotedString.charAt(quotedString.length() - 1) == c);
+            return quotedString.substring(1, quotedString.length() - 1);
+        }
     }
 
     /**

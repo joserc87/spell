@@ -113,7 +113,7 @@ wizard: (NEWLINE | step)* EOF;
 
 // Each step is a step header + a block
 step
-  : STEP STRING (COMMA STRING)? alias? COLON NEWLINE
+  : STEP STRING_LITERAL (COMMA STRING_LITERAL)? alias? COLON NEWLINE
     INDENT
       ( question
       | when
@@ -142,12 +142,12 @@ question
 
 // When basic control but control type is not defined -> string control
 named_string_control
-  : STRING default_value? ctrl_metadata? alias? NEWLINE
+  : STRING_LITERAL default_value? ctrl_metadata? alias? NEWLINE
   ;
 
 // Label, String, Email, Text, Date, Number or Checkbox
 named_basic_control
-  : basic_control_type control_attribute_list? STRING? default_value? ctrl_metadata? alias? NEWLINE
+  : basic_control_type control_attribute_list? STRING_LITERAL? default_value? ctrl_metadata? alias? NEWLINE
   ;
 unnamed_basic_control
   : basic_control_type control_attribute_list? default_value? ctrl_metadata? alias? NEWLINE
@@ -155,7 +155,7 @@ unnamed_basic_control
 
 // List
 named_list_control
-  : LIST_TYPE control_attribute_list? STRING? default_value? ctrl_metadata? alias? COLON NEWLINE
+  : LIST_TYPE control_attribute_list? STRING_LITERAL? default_value? ctrl_metadata? alias? COLON NEWLINE
     INDENT
       (list_item)+
     DEDENT
@@ -173,7 +173,7 @@ list_item
 
 // Image, File
 named_upload_control
-  : upload_control_type control_attribute_list? STRING? default_value? ctrl_metadata? alias? NEWLINE
+  : upload_control_type control_attribute_list? STRING_LITERAL? default_value? ctrl_metadata? alias? NEWLINE
   ;
 unnamed_upload_control
   : upload_control_type control_attribute_list? default_value? ctrl_metadata? alias? NEWLINE
@@ -181,7 +181,7 @@ unnamed_upload_control
 
 // Radio, Multi
 named_container_control
-  : container_control_type control_attribute_list? STRING? default_value? ctrl_metadata? alias? COLON NEWLINE
+  : container_control_type control_attribute_list? STRING_LITERAL? default_value? ctrl_metadata? alias? COLON NEWLINE
     INDENT
       sub_control+
     DEDENT
@@ -210,7 +210,7 @@ control_attribute
   ;
 
 string_or_metadata
-  : STRING
+  : STRING_LITERAL
   | METADATA
   ;
 
@@ -255,7 +255,7 @@ when_instruction
   ;
 
 metadata_assignment
-  : METADATA EQUAL STRING
+  : METADATA EQUAL STRING_LITERAL
   ;
 
 jump
@@ -263,7 +263,7 @@ jump
   ;
 
 literal
-  : STRING | NUM | bool
+  : STRING_LITERAL | NUM | bool
   ;
 
 test
@@ -325,34 +325,45 @@ comp_op
 //////////////////
 
 
-// and lexer rule
- INCLUDE
-   : 'include' (SPACES)? f=STRING {
-     /*
-     String name = f.getText();
-     name = name.substring(1,name.length()-1);
-     try {
-      // save current lexer's state
-       SaveStruct ss = new SaveStruct(input);
-       includes.push(ss);
-
-      // switch on new input stream
-       setCharStream(new ANTLRFileStream(name));
-       reset();
-
-     } catch(Exception fnf) { throw new Error("Cannot open file " + name); }
-     */
-     skip();
-   }
-   ;
-
 // From python:
 // https://github.com/antlr/grammars-v4/blob/master/python3/Python3.g4
 
-STRING
-  : '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n'] )* '\''
-  | '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
-  ;
+/// stringliteral   ::=  (shortstring | longstring)
+STRING_LITERAL
+ : SHORT_STRING
+ | LONG_STRING
+ ;
+
+/// shortstring     ::=  "'" shortstringitem* "'" | '"' shortstringitem* '"'
+/// shortstringitem ::=  shortstringchar | stringescapeseq
+/// shortstringchar ::=  <any source character except "\" or newline or the quote>
+fragment SHORT_STRING
+ : '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n\f'] )* '\''
+ | '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n\f"] )* '"'
+ ;
+/// longstring      ::=  "'''" longstringitem* "'''" | '"""' longstringitem* '"""'
+fragment LONG_STRING
+ : '\'\'\'' LONG_STRING_ITEM*? '\'\'\''
+ | '"""' LONG_STRING_ITEM*? '"""'
+ ;
+
+/// longstringitem  ::=  longstringchar | stringescapeseq
+fragment LONG_STRING_ITEM
+ : LONG_STRING_CHAR
+ | STRING_ESCAPE_SEQ
+ ;
+
+/// longstringchar  ::=  <any source character except "\">
+fragment LONG_STRING_CHAR
+ : ~'\\'
+ ;
+
+/// stringescapeseq ::=  "\" <any source character>
+fragment STRING_ESCAPE_SEQ
+ : '\\' .
+ | '\\' NEWLINE
+ ;
+
 
 bool
   : ( TRUE | FALSE )
@@ -389,11 +400,6 @@ RADIO_TYPE      : 'radio';
 ATTACHMENT_TYPE : 'attachment';
 IMAGE_TYPE      : 'image';
 MULTI_TYPE      : 'multi';
-
-/// stringescapeseq ::=  "\" <any source character>
-fragment STRING_ESCAPE_SEQ
- : '\\' .
- ;
 
 NEWLINE
  : ( {atStartOfInput()}?   SPACES

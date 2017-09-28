@@ -59,9 +59,9 @@ public class MySpellListener extends SpellBaseListener {
     protected Steptype getStep(SpellParser.StepContext ctx) {
         Step step = (Step)objectFactory.createSteptype();
         // Step name and groupName
-        step.setName(helper.getString(ctx.STRING(0)));
-        if (ctx.STRING().size() > 1) {
-            step.setGroupName(helper.getString(ctx.STRING(1)));
+        step.setName(helper.getString(ctx.STRING_LITERAL(0)));
+        if (ctx.STRING_LITERAL().size() > 1) {
+            step.setGroupName(helper.getString(ctx.STRING_LITERAL(1)));
         }
         // Alias:
         if (ctx.alias() != null) {
@@ -104,7 +104,7 @@ public class MySpellListener extends SpellBaseListener {
                 ImplicitWizardMetadata iwm = objectFactory.createImplicitWizardMetadata();
                 ar.getMetadatas().getMetadata().add(iwm);
                 iwm.setName(this.helper.getMetadataName(maCtx.METADATA()));
-                iwm.setValue(this.helper.getString(maCtx.STRING()));
+                iwm.setValue(this.helper.getString(maCtx.STRING_LITERAL()));
             }
 
             // Add advanced rule to the list
@@ -154,7 +154,7 @@ public class MySpellListener extends SpellBaseListener {
                     ImplicitWizardMetadata iwm = objectFactory.createImplicitWizardMetadata();
                     ar.getMetadatas().getMetadata().add(iwm);
                     iwm.setName(this.helper.getMetadataName(instruction.metadata_assignment().METADATA()));
-                    iwm.setValue(this.helper.getString(instruction.metadata_assignment().STRING()));
+                    iwm.setValue(this.helper.getString(instruction.metadata_assignment().STRING_LITERAL()));
                 } else if (instruction.jump() != null) {
                     // Condition
                     if (condition == null) {
@@ -220,15 +220,15 @@ public class MySpellListener extends SpellBaseListener {
         // Question name:
         String name = null;
         if (ctx.named_string_control() != null) {
-            name = helper.getString(ctx.named_string_control().STRING());
+            name = helper.getString(ctx.named_string_control().STRING_LITERAL());
         } else if (ctx.named_basic_control() != null) {
-            name = helper.getString(ctx.named_basic_control().STRING());
+            name = helper.getString(ctx.named_basic_control().STRING_LITERAL());
         } else if (ctx.named_list_control() != null) {
-            name = helper.getString(ctx.named_list_control().STRING());
+            name = helper.getString(ctx.named_list_control().STRING_LITERAL());
         } else if (ctx.named_upload_control() != null) {
-            name = helper.getString(ctx.named_upload_control().STRING());
+            name = helper.getString(ctx.named_upload_control().STRING_LITERAL());
         } else if (ctx.named_container_control() != null) {
-            name = helper.getString(ctx.named_container_control().STRING());
+            name = helper.getString(ctx.named_container_control().STRING_LITERAL());
         }
         if (name != null) {
             question.setName(name);

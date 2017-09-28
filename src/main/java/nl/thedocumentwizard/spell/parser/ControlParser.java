@@ -137,9 +137,9 @@ public class ControlParser {
                 String value = null;
                 String metadataName = null;
                 if (defaultValue.literal() != null) {
-                    if (defaultValue.literal().STRING() != null) {
+                    if (defaultValue.literal().STRING_LITERAL() != null) {
                         // The default value is a string
-                        value = helper.getString(defaultValue.literal().STRING());
+                        value = helper.getString(defaultValue.literal().STRING_LITERAL());
                     } else if (defaultValue.literal().NUM() != null) {
                         // The default value is a number
                         value = defaultValue.literal().NUM().getText();
@@ -202,9 +202,9 @@ public class ControlParser {
                         String attributeKey = attribute.NAME().getText();
                         Object attributeValue = null;
                         String methodName = getSetterMethodName(attributeKey);
-                        if (attribute.literal().STRING() != null) {
+                        if (attribute.literal().STRING_LITERAL() != null) {
                             // The value is a string
-                            attributeValue = helper.getString(attribute.literal().STRING());
+                            attributeValue = helper.getString(attribute.literal().STRING_LITERAL());
                             // Check if the attribute is an enum:
                             Object enumValue = convertEnum(attributeKey, attributeValue);
                             if (enumValue != null) {
@@ -239,8 +239,8 @@ public class ControlParser {
         ExplicitWizardMetadata m = objectFactory.createExplicitWizardMetadata();
         if (ctx.METADATA() != null) {
             m.setMetadataName(helper.getMetadataName(ctx.METADATA()));
-        } else if (ctx.STRING() != null) {
-            m.setValue(helper.getString(ctx.STRING()));
+        } else if (ctx.STRING_LITERAL() != null) {
+            m.setValue(helper.getString(ctx.STRING_LITERAL()));
         }
         return m;
     }

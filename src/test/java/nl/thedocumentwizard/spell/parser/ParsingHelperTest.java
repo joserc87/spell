@@ -25,6 +25,7 @@ public class ParsingHelperTest {
         Assert.assertEquals("a", helper.getString("\'a\'"));
         Assert.assertEquals("asdf", helper.getString("\"asdf\""));
         Assert.assertEquals(" text \n with \t multiple \n lines ", helper.getString("\' text \n with \t multiple \n lines \'"));
+        Assert.assertEquals(" text \n with \t multiple \n lines ", helper.getString("\'\'\' text \n with \t multiple \n lines \'\'\'"));
     }
 
     @Test

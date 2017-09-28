@@ -31,7 +31,7 @@ public class ControlParserTest {
     public SpellParser.LiteralContext mockOfStringLiteral(String s) {
         SpellParser.LiteralContext ctx = mock(SpellParser.LiteralContext.class);
         TerminalNode term = mockOfTerminalNode(s);
-        when(ctx.STRING()).thenReturn(term);
+        when(ctx.STRING_LITERAL()).thenReturn(term);
         return ctx;
     }
 
@@ -53,8 +53,8 @@ public class ControlParserTest {
 
     public SpellParser.Default_valueContext mockOfStringDefaultValue(String s) {
         SpellParser.Default_valueContext defVal = mock(SpellParser.Default_valueContext.class);
-        SpellParser.LiteralContext STRING = mockOfStringLiteral(s);
-        when(defVal.literal()).thenReturn(STRING);
+        SpellParser.LiteralContext STRING_LITERAL = mockOfStringLiteral(s);
+        when(defVal.literal()).thenReturn(STRING_LITERAL);
         return defVal;
     }
 
@@ -226,7 +226,7 @@ public class ControlParserTest {
     public SpellParser.String_or_metadataContext createString_or_metadataContext(TerminalNode string, TerminalNode metadata) {
         SpellParser.String_or_metadataContext ctx = mock(SpellParser.String_or_metadataContext.class);
         if (string != null) {
-            when(ctx.STRING()).thenReturn(string);
+            when(ctx.STRING_LITERAL()).thenReturn(string);
         }
         if (metadata != null) {
             when(ctx.METADATA()).thenReturn(metadata);
