@@ -65,4 +65,10 @@ public class ParsingHelperTest {
         when(node.getText()).thenReturn("$$metadata1");
         Assert.assertEquals("$metadata1", helper.getMetadataName(node));
     }
+
+    @Test
+    public void should_get_content_of_script_when_correct() {
+        Assert.assertEquals("", helper.getScript("``````"));
+        Assert.assertEquals("\nsome code\n", helper.getScript("```\nsome code\n```"));
+    }
 }

@@ -111,6 +111,42 @@ public class MySpellListener extends SpellBaseListener {
             step.getAdvancedRules().getAdvancedRule().add(ar);
 
         }
+        // Scripts:
+        if (ctx.script() != null && ctx.script().size() > 0) {
+            // If the step doesn't have advanced rules, create an empty list
+            if (step.getScripts() == null) {
+                step.setScripts(objectFactory.createArrayOfWizardScript());
+            }
+
+            // Create the script
+            for (SpellParser.ScriptContext scrCtx : ctx.script()) {
+                // Script
+                ArrayOfWizardScript.Script script = objectFactory.createArrayOfWizardScriptScript();
+                // Defaults:
+                script.setType(ScriptType.EXIT_STEP);
+                script.setLanguage(ScriptLanguage.PYTHON);
+
+                String scriptContent = helper.getScript(scrCtx.CODE_BLOCK());
+                // Parse the script content to know the language and the type
+                String firstLine = scriptContent.split("\\n")[0];
+                scriptContent = scriptContent.substring(firstLine.length());
+
+                // Check the type
+                if (firstLine.equalsIgnoreCase("ExitStep")) {
+                    script.setType(ScriptType.EXIT_STEP);
+                } else if (firstLine.equalsIgnoreCase("EnterStep")) {
+                    script.setType(ScriptType.ENTER_STEP);
+                } else if (firstLine.equalsIgnoreCase("Validation")) {
+                    script.setType(ScriptType.VALIDATION);
+                } else {
+                    //throw new Exception("Error: " + firstLine + " not recognized as a script type");
+                }
+
+                script.setValue(scriptContent);
+
+                step.getScripts().getScript().add(script);
+            }
+        }
         return step;
     }
 

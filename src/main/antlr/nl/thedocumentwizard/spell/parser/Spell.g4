@@ -119,6 +119,7 @@ step
       | when
       | metadata_assignment NEWLINE
       | jump NEWLINE
+      | script
       )*
     DEDENT
   ;
@@ -262,6 +263,10 @@ jump
   : GOTO NAME
   ;
 
+script
+  : CODE_BLOCK NEWLINE
+  ;
+
 literal
   : STRING_LITERAL | NUM | bool
   ;
@@ -324,6 +329,11 @@ comp_op
 // LEXER RULES: //
 //////////////////
 
+
+
+CODE_BLOCK
+ : '```' LONG_STRING_ITEM*? '```'
+ ;
 
 // From python:
 // https://github.com/antlr/grammars-v4/blob/master/python3/Python3.g4

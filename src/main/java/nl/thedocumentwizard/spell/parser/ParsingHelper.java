@@ -90,4 +90,45 @@ public class ParsingHelper {
             return null;
         }
     }
+
+    /**
+     * Parses a string with single or double quotes and returns the content
+     *
+     * @param quotedScript A string with the format "content"
+     *
+     * @return A string with the content
+     */
+    public String getScript(String quotedScript) {
+        assert(quotedScript != null && quotedScript.length() >= 2);
+        char c = quotedScript.charAt(0);
+        assert(c == '`');
+        if (quotedScript.length() >= 6 &&
+                quotedScript.charAt(1) == c && quotedScript.charAt(2) == c) { // LONG_STRING
+
+            assert(quotedScript.charAt(quotedScript.length() - 1) == c &&
+                    quotedScript.charAt(quotedScript.length() - 2) == c &&
+                    quotedScript.charAt(quotedScript.length() - 3) == c);
+            return quotedScript.substring(3, quotedScript.length() - 3);
+        } else { // SHORT_STRING
+            assert(quotedScript.length() >= 2 &&
+                    quotedScript.charAt(quotedScript.length() - 1) == c);
+            return quotedScript.substring(1, quotedScript.length() - 1);
+        }
+    }
+
+    /**
+     * Accepts a TerminalNode of type CODE_BLOCK as a parameter and returns the
+     * content of the string, without quotes. It also dedents the code.
+     *
+     * @param node The terminal node
+     *
+     * @return A string with the content
+     */
+    public String getScript(TerminalNode node) {
+        if (node != null && node.getText() != null) {
+            return this.getScript(node.getText());
+        } else {
+            return null;
+        }
+    }
 }
