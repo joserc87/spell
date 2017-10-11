@@ -93,8 +93,8 @@ public class WhenParser {
                         return this.parseBooleanLiteral(term.literal().bool());
                     } else if (term.literal().NUM() != null){
                         this.logError("Expected boolean expression but found numeric value '" + term.literal().NUM().getText() + "'");
-                    } else if (term.literal().STRING() != null){
-                        this.logError("Expected boolean expression but found string value " + term.literal().STRING().getText());
+                    } else if (term.literal().STRING_LITERAL() != null){
+                        this.logError("Expected boolean expression but found string value " + term.literal().STRING_LITERAL().getText());
                     }
                 } else if (term.METADATA() != null) {
                     // Return metadata == "True"
@@ -233,9 +233,9 @@ public class WhenParser {
                 ConstTriggerValue val = objectFactory.createConstTriggerValue();
                 val.setVal(term.literal().NUM().getText());
                 return val;
-            } else if (term.literal().STRING() != null) {
+            } else if (term.literal().STRING_LITERAL() != null) {
                 ConstTriggerValue val = objectFactory.createConstTriggerValue();
-                val.setVal(this.helper.getString(term.literal().STRING().getText()));
+                val.setVal(this.helper.getString(term.literal().STRING_LITERAL().getText()));
                 return val;
             }
         } else if (term.METADATA() != null) {

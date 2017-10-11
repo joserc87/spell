@@ -59,9 +59,9 @@ public class MySpellListener extends SpellBaseListener {
     protected Steptype getStep(SpellParser.StepContext ctx) {
         Step step = (Step)objectFactory.createSteptype();
         // Step name and groupName
-        step.setName(helper.getString(ctx.STRING(0)));
-        if (ctx.STRING().size() > 1) {
-            step.setGroupName(helper.getString(ctx.STRING(1)));
+        step.setName(helper.getString(ctx.STRING_LITERAL(0)));
+        if (ctx.STRING_LITERAL().size() > 1) {
+            step.setGroupName(helper.getString(ctx.STRING_LITERAL(1)));
         }
         // Alias:
         if (ctx.alias() != null) {
@@ -104,12 +104,48 @@ public class MySpellListener extends SpellBaseListener {
                 ImplicitWizardMetadata iwm = objectFactory.createImplicitWizardMetadata();
                 ar.getMetadatas().getMetadata().add(iwm);
                 iwm.setName(this.helper.getMetadataName(maCtx.METADATA()));
-                iwm.setValue(this.helper.getString(maCtx.STRING()));
+                iwm.setValue(this.helper.getString(maCtx.STRING_LITERAL()));
             }
 
             // Add advanced rule to the list
             step.getAdvancedRules().getAdvancedRule().add(ar);
 
+        }
+        // Scripts:
+        if (ctx.script() != null && ctx.script().size() > 0) {
+            // If the step doesn't have advanced rules, create an empty list
+            if (step.getScripts() == null) {
+                step.setScripts(objectFactory.createArrayOfWizardScript());
+            }
+
+            // Create the script
+            for (SpellParser.ScriptContext scrCtx : ctx.script()) {
+                // Script
+                ArrayOfWizardScript.Script script = objectFactory.createArrayOfWizardScriptScript();
+                // Defaults:
+                script.setType(ScriptType.EXIT_STEP);
+                script.setLanguage(ScriptLanguage.PYTHON);
+
+                String scriptContent = helper.getScript(scrCtx.CODE_BLOCK());
+                // Parse the script content to know the language and the type
+                String firstLine = scriptContent.split("\\n")[0];
+                scriptContent = scriptContent.substring(firstLine.length());
+
+                // Check the type
+                if (firstLine.equalsIgnoreCase("ExitStep")) {
+                    script.setType(ScriptType.EXIT_STEP);
+                } else if (firstLine.equalsIgnoreCase("EnterStep")) {
+                    script.setType(ScriptType.ENTER_STEP);
+                } else if (firstLine.equalsIgnoreCase("Validation")) {
+                    script.setType(ScriptType.VALIDATION);
+                } else {
+                    //throw new Exception("Error: " + firstLine + " not recognized as a script type");
+                }
+
+                script.setValue(scriptContent);
+
+                step.getScripts().getScript().add(script);
+            }
         }
         return step;
     }
@@ -154,7 +190,7 @@ public class MySpellListener extends SpellBaseListener {
                     ImplicitWizardMetadata iwm = objectFactory.createImplicitWizardMetadata();
                     ar.getMetadatas().getMetadata().add(iwm);
                     iwm.setName(this.helper.getMetadataName(instruction.metadata_assignment().METADATA()));
-                    iwm.setValue(this.helper.getString(instruction.metadata_assignment().STRING()));
+                    iwm.setValue(this.helper.getString(instruction.metadata_assignment().STRING_LITERAL()));
                 } else if (instruction.jump() != null) {
                     // Condition
                     if (condition == null) {
@@ -220,15 +256,15 @@ public class MySpellListener extends SpellBaseListener {
         // Question name:
         String name = null;
         if (ctx.named_string_control() != null) {
-            name = helper.getString(ctx.named_string_control().STRING());
+            name = helper.getString(ctx.named_string_control().STRING_LITERAL());
         } else if (ctx.named_basic_control() != null) {
-            name = helper.getString(ctx.named_basic_control().STRING());
+            name = helper.getString(ctx.named_basic_control().STRING_LITERAL());
         } else if (ctx.named_list_control() != null) {
-            name = helper.getString(ctx.named_list_control().STRING());
+            name = helper.getString(ctx.named_list_control().STRING_LITERAL());
         } else if (ctx.named_upload_control() != null) {
-            name = helper.getString(ctx.named_upload_control().STRING());
+            name = helper.getString(ctx.named_upload_control().STRING_LITERAL());
         } else if (ctx.named_container_control() != null) {
-            name = helper.getString(ctx.named_container_control().STRING());
+            name = helper.getString(ctx.named_container_control().STRING_LITERAL());
         }
         if (name != null) {
             question.setName(name);

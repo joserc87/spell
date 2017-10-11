@@ -14,6 +14,10 @@ public class ParsingHelper {
 
     }
 
+    private boolean isQuote(char c) {
+        return c == '"' || c == '\'';
+    }
+
     /**
      * Parses a string with single or double quotes and returns the content
      * 
@@ -22,11 +26,21 @@ public class ParsingHelper {
      * @return A string with the content
      */
     public String getString(String quotedString) {
-        assert (quotedString != null && quotedString.length() >= 2 &&
-                quotedString.charAt(0) == quotedString.charAt(quotedString.length() - 1) &&
-                (quotedString.charAt(0) == '"' || quotedString.charAt(0) == '\''));
-        return quotedString.substring(1, quotedString.length() - 1);
+        assert(quotedString != null && quotedString.length() >= 2);
+        char c = quotedString.charAt(0);
+        assert(isQuote(c));
+        if (quotedString.length() >= 6 &&
+            quotedString.charAt(1) == c && quotedString.charAt(2) == c) { // LONG_STRING
 
+            assert(quotedString.charAt(quotedString.length() - 1) == c &&
+                   quotedString.charAt(quotedString.length() - 2) == c &&
+                   quotedString.charAt(quotedString.length() - 3) == c);
+            return quotedString.substring(3, quotedString.length() - 3);
+        } else { // SHORT_STRING
+            assert(quotedString.length() >= 2 &&
+                   quotedString.charAt(quotedString.length() - 1) == c);
+            return quotedString.substring(1, quotedString.length() - 1);
+        }
     }
 
     /**
@@ -72,6 +86,47 @@ public class ParsingHelper {
         if (node != null) {
             String $metadataName = node.getText();
             return this.getMetadataName($metadataName);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Parses a string with single or double quotes and returns the content
+     *
+     * @param quotedScript A string with the format "content"
+     *
+     * @return A string with the content
+     */
+    public String getScript(String quotedScript) {
+        assert(quotedScript != null && quotedScript.length() >= 2);
+        char c = quotedScript.charAt(0);
+        assert(c == '`');
+        if (quotedScript.length() >= 6 &&
+                quotedScript.charAt(1) == c && quotedScript.charAt(2) == c) { // LONG_STRING
+
+            assert(quotedScript.charAt(quotedScript.length() - 1) == c &&
+                    quotedScript.charAt(quotedScript.length() - 2) == c &&
+                    quotedScript.charAt(quotedScript.length() - 3) == c);
+            return quotedScript.substring(3, quotedScript.length() - 3);
+        } else { // SHORT_STRING
+            assert(quotedScript.length() >= 2 &&
+                    quotedScript.charAt(quotedScript.length() - 1) == c);
+            return quotedScript.substring(1, quotedScript.length() - 1);
+        }
+    }
+
+    /**
+     * Accepts a TerminalNode of type CODE_BLOCK as a parameter and returns the
+     * content of the string, without quotes. It also dedents the code.
+     *
+     * @param node The terminal node
+     *
+     * @return A string with the content
+     */
+    public String getScript(TerminalNode node) {
+        if (node != null && node.getText() != null) {
+            return this.getScript(node.getText());
         } else {
             return null;
         }
