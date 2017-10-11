@@ -1,9 +1,9 @@
 # SPELL Language Compiler
 
-![build](https://travis-ci.org/joserc87/spell.svg?branch=master)
+[![Build Status](https://travis-ci.org/joserc87/spell.svg?branch=master)](https://travis-ci.org/joserc87/spell)
 [![Coverage Status](https://coveralls.io/repos/github/joserc87/spell/badge.svg?branch=travis)](https://coveralls.io/github/joserc87/spell?branch=travis)
-[![Github All Releases](https://img.shields.io/github/downloads/joserc87/spell/total.svg)]()
-[![GitHub release](https://img.shields.io/github/release/joserc87/spell.svg)]()
+[![Github All Releases](https://img.shields.io/github/downloads/joserc87/spell/total.svg)](https://github.com/joserc87/spell/releases)
+[![GitHub Release](https://img.shields.io/github/release/joserc87/spell.svg)](https://github.com/joserc87/spell/releases/latest)
 
 A compiler to generate wizard configuration XMLs from the much simpler SPELL
 langauge, written in Java. It uses [antrl](http://www.antlr.org) to parse the
